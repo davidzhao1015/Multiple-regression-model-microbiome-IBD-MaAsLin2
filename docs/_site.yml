@@ -5,3 +5,6 @@ navbar:
  left:
   - text: "Home"
     href: my-website.html
+  - text: "Multivariable regression"
+    href: index.html
+
