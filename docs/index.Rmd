@@ -90,7 +90,7 @@ download.file("https://raw.githubusercontent.com/biobakery/biobakery_workflows/m
 
 ```
 
-```{r message=FALSE,results='hide',collapse=TRUE}
+```{r message=FALSE, results='hide',collapse=TRUE}
  
 # microbiome abundance data 
 df_input_data <- read.table(file = input_data,
@@ -126,7 +126,7 @@ fit_data2 <- Maaslin2(
         normalization = "NONE",  #without additional normalization  
         output = "demo_output2",
         fixed_effects = c("diagnosis", "dysbiosis"),  #set diagnosis and dysbiosis as fixed effect variables 
-        reference = c("diagnosis,nonIBD")) #set baseline for the categorical variable, diagnosis 
+        reference = c("diagnosis,nonIBD")) #set the baseline for the categorical variable, diagnosis 
 
 all_results <- fit_data2$results #extract coefficients and q-value
 
