@@ -92,7 +92,7 @@ download.file("https://raw.githubusercontent.com/biobakery/biobakery_workflows/m
 
 ```{r message=FALSE, results='hide',collapse=TRUE}
  
-# microbiome abundance data 
+# relative abundance data 
 df_input_data <- read.table(file = input_data,
                             header = TRUE,
                             sep = "\t",
@@ -125,6 +125,10 @@ fit_data2 <- Maaslin2(
         min_prevalence = 0, #without additional filtering 
         normalization = "NONE",  #without additional normalization  
         output = "demo_output2",
+        max_significance = 0.1,
+        plot_heatmap = FALSE,
+        plot_scatter = FALSE,
+        analysis_method = "LM",  #linear regression model 
         fixed_effects = c("diagnosis", "dysbiosis"),  #set diagnosis and dysbiosis as fixed effect variables 
         reference = c("diagnosis,nonIBD")) #set the baseline for the categorical variable, diagnosis 
 
