@@ -27,3 +27,8 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 pathabundance_relab.tsv
+demo_functional
+demo_output2
+demo_output_filter
+demo_output_interaction
+demo_output_random
