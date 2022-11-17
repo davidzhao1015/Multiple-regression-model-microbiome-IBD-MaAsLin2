@@ -1,0 +1,258 @@
+---
+title: "Multivariable regression of microbiome and IBD using MaAsLin2 R package"
+author: "David Xin Zhao"
+date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    css: styles.css
+    toc: yes
+    toc_float: yes
+    collapsed: false 
+  toc_depth: 3
+  number_sections: true
+---
+
+
+```{=html}
+<style>
+#TOC{
+ color: #7E7C73;
+ font-family: Calibri;
+ font-size: 16px;
+ border-color: #BBC4C2;
+}
+h1.title{
+ color: #140005;
+ background-color: #F5F5F5;
+ opacity: 0.6;
+ font-family: Calibri;
+ font-size: 30px;
+}
+h4.author{
+ color: #464033;
+ font-family: Calibri;
+ font-size: 25px;
+}
+h4.date{
+ color: #464033;
+ font-family:Calibri; 
+}
+body{
+ color: #464033; 
+ font-family: Calibri; 
+ background-color: #F5F5F5;
+}
+pre{
+ color: #464033;
+ background-color: #FFFFFF;
+}
+</style>
+```
+```{r setup, include = FALSE}
+# set options for the entire document 
+knitr::opts_chunk$set(fig.align = 'center', 
+                      echo=TRUE, #display code in output document 
+                      error=FALSE,
+                      message=FALSE) #stop render when error occurs   
+```
+
+## MaAsLin2
+
+[MaAsLin2](https://github.com/biobakery/biobakery/wiki/maaslin2) is to efficiently determine multivariable association between phenotypes, environments, exposures, covariates and microbial meta-omics features.
+
+## Install MaAsLin2 with Bioconductor
+
+```{r message=FALSE}
+
+# if(!requireNamespace("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# BiocManager::install("Maaslin2")
+
+library(Maaslin2)
+library(tidyverse)
+
+```
+
+## Multiple regression of microbiome and clincial covariates of interest
+
+### Load data sets (use example datasets provided by MaAsLin2 package)
+
+```{r include=FALSE}
+
+# set file pathway to abundance data 
+input_data <- system.file("extdata",
+                          "HMP2_taxonomy.tsv",
+                          package="Maaslin2") # the abundance table file 
+
+# set file pathway to meta data 
+input_metadata <- system.file("extdata",
+                              "HMP2_metadata.tsv",
+                              package = "Maaslin2")  # the metadata table file 
+
+# get the pathway (functional) data 
+download.file("https://raw.githubusercontent.com/biobakery/biobakery_workflows/master/examples/tutorial/stats_vis/input/pathabundance_relab.tsv", "./pathabundance_relab.tsv")
+
+```
+
+```{r message=FALSE, results='hide',collapse=TRUE}
+ 
+# relative abundance data 
+df_input_data <- read.table(file = input_data,
+                            header = TRUE,
+                            sep = "\t",
+                            row.names = 1,
+                            stringsAsFactors = FALSE) 
+
+# meta data 
+df_input_metadata <- read.table(file=input_metadata,
+                                header = T,
+                                sep="\t",
+                                row.names = 1,
+                                stringsAsFactors = F) 
+
+# pathway data 
+df_input_path <- data.frame(read.csv("./pathabundance_relab.tsv", 
+                                     sep = "\t", 
+                                     stringsAsFactors = F, 
+                                     row.names = 1))
+
+```
+
+### Fit mutiple linear regression model on microbiome data
+
+The following command runs MaAsLin2 on the HMP2 data, running a multivariable regression model to test for the association between microbial species abundance versus IBD diagnosis and dysbiosis scores.
+
+```{r message=FALSE,results='hide',collapse=TRUE}
+fit_data2 <- Maaslin2(
+        input_data = df_input_data,
+        input_metadata = df_input_metadata,
+        min_prevalence = 0, #without additional filtering 
+        normalization = "NONE",  #without additional normalization  
+        output = "demo_output2",
+        max_significance = 0.1,
+        plot_heatmap = FALSE,
+        plot_scatter = FALSE,
+        analysis_method = "LM",  #linear regression model 
+        fixed_effects = c("diagnosis", "dysbiosis"),  #set diagnosis and dysbiosis as fixed effect variables 
+        reference = c("diagnosis,nonIBD")) #set the baseline for the categorical variable, diagnosis 
+
+all_results <- fit_data2$results #extract coefficients and q-value
+
+```
+
+### Evaluate significant genus based on model parameters
+
+significant associations is provided in 'significant_results.tsv'
+
+```{r}
+sig_results <- all_results %>% 
+        filter(qval <= 0.05) %>% #sig threshold 
+        arrange(qval)
+
+head(sig_results, 5) #view first rows 
+
+```
+
+### Fit multivariable regression models on functional data
+
+Authors tend to work with CPM units because we find them to be more convenient, but they are numerically equivalent to relative abundances for modeling purposes (CPM = RA \* 1e6)
+
+Quick tips for using MaAsLin2 on functional profiles: 1.To reduce the number of features, you typically want to run either the unstratified functional features ( or a filtered subset of the stratified features) 2.You may also want to remove functional features that are highly correlated to one specific taxon (i.e. likely contributed by that microbe), since these can be better-explained by taxonomic changes
+
+```{r normalization, message=FALSE}
+
+#This can also be done with with the HUMAnN 3 untiliy `humann_split_stratified_table`
+unstrat_pathways <-function(dat_path){
+  temp = dat_path[!grepl("\\|",rownames(dat_path)),]
+  return(temp)
+}
+
+df_input_path = unstrat_pathways(df_input_path)
+
+```
+
+Run the same model as above on the MetaCyc pathway table generated from the bioBakery workflows.
+
+```{r message=FALSE,results='hide',collapse=TRUE}
+# fit the model on pathway (functional) data - it takes a few minutes  
+fit_func <- Maaslin2(
+        input_data = df_input_path,
+        input_metadata = df_input_metadata,
+        output = "demo_functional",
+        fixed_effects = c("diagnosis", "dysbiosis"),
+        reference=c("diagnosis,nonIBD"),
+        min_abundance = 0.0001,
+        min_prevalence = 0.1) 
+
+# note: here we have the samples in the columns and the features in the rows and MaAsLin2 correctly identified this and was able to match the samples. 
+
+all_results_func <- fit_func$results
+
+```
+
+### Interactions
+
+Unfortunately, MaAsLin2 does not yet provide a direct interface for testing for interaction. Instead, the user needs to create artificial interaction columns as additional 'fixed_effects' terms.
+
+Using the above fit as an example, to test for the interaction between 'diagnosis' and 'dysbiosis', I can create two additional columns: 'CD_dysbiosis' and 'UC_dysbiosis' (since the reference for 'diagnosis' is 'nonIBD'):
+
+```{r interaction term, message=FALSE,results='hide',collapse=TRUE}
+
+df_input_metadata$CD_dysbiosis <- (df_input_metadata$diagnosis == "CD") * df_input_metadata$dysbiosis
+
+df_input_metadata$UC_dysbiosis <- (df_input_metadata$diagnosis == "UC") * df_input_metadata$dysbiosis
+
+fit_data_interaction <- Maaslin2(
+        input_data = df_input_data,
+        input_metadata = df_input_metadata,
+        min_prevalence = 0,
+        normalization = "NONE",
+        output = "demo_output_interaction",
+        fixed_effects = c("diagnosis", "dysbiosis", "CD_dysbiosis", "UC_dysbiosis"),
+        reference = c("diagnosis,nonIBD")) 
+
+all_results_interaction <- fit_data_interaction$results  # store results 
+
+```
+
+### Random effects
+
+We note that HMP2 is a longitudinal design where the same subject (column 'subject') can have multiple samples. We thus ask MaAsLin2 to use subject as its random effect grouping variable:
+
+```{r mixed effect model, message=FALSE,results='hide',collapse=TRUE}
+
+fit_data_random <- Maaslin2(
+        input_data = df_input_data,
+        input_metadata = df_input_metadata,
+        min_prevalence = 0,
+        normalization = "NONE",
+        output = "demo_output_random",
+        fixed_effects = c("diagnosis", "dysbiosis"),
+        random_effects = c("subject"),
+        reference = c("diagnosis,nonIBD")
+)
+
+all_results_random <- fit_data_random$results
+
+```
+
+If you are interested in testing the effect of time in a longitudinal study, then the itme point variable should be included in 'fixed_effects' during your MaAsLin2 call.
+
+### Prevalence and abundance filtering in MaAsLin2
+
+minimum prevalence threshold: 10-50% (up to 70-90% can be reasonable) minimum relative abundance threshold: 0.0001
+
+```{r prevalence and abundance filtering, message=FALSE,results='hide',collapse=TRUE}
+
+fit_data_filter = Maaslin2(
+    input_data = df_input_data, 
+    input_metadata = df_input_metadata, 
+    normalization = "NONE",
+    output = "demo_output_filter", 
+    fixed_effects = c("diagnosis", "dysbiosis"),
+    reference = c("diagnosis,nonIBD"),
+    random_effects = c("subject"),
+    min_prevalence = 0.1,
+    min_abundance = 0.0001)
+
+```
