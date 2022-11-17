@@ -91,8 +91,8 @@ input_metadata <- system.file("extdata",
                               "HMP2_metadata.tsv",
                               package = "Maaslin2")  # the metadata table file 
 
-# get the pathway (functional) data 
-download.file("https://raw.githubusercontent.com/biobakery/biobakery_workflows/master/examples/tutorial/stats_vis/input/pathabundance_relab.tsv", "./pathabundance_relab.tsv")
+# # get the pathway (functional) data 
+# download.file("https://raw.githubusercontent.com/biobakery/biobakery_workflows/master/examples/tutorial/stats_vis/input/pathabundance_relab.tsv", "./pathabundance_relab.tsv")
 
 ```
 
