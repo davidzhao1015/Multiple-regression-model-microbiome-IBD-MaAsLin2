@@ -7,41 +7,42 @@ output:
     css: styles.css
     toc: yes
     toc_float: yes
-    collapsed: false 
-  toc_depth: 3
-  number_sections: true
+    collapsed: no 
+  toc_depth: 2
 ---
 
 ```{=html}
 <style>
 #TOC{
- color: #708090;
+ color: #7E7C73;
  font-family: Calibri;
  font-size: 16px;
- border-color: #708090;
+ border-color: #BBC4C2;
 }
 h1.title{
- color: #800000;
+ color: #140005;
  background-color: #F5F5F5;
  opacity: 0.6;
  font-family: Calibri;
- font-size: 40px;
+ font-size: 30px;
 }
 h4.author{
- color: #708090;
+ color: #464033;
  font-family: Calibri;
- font-size: 40px;
+ font-size: 25px;
 }
 h4.date{
- color: #708090;
+ color: #464033;
  font-family:Calibri; 
 }
 body{
- color: #708090; font-family: Calibri; background-color: #F5F5F5;
+ color: #464033; 
+ font-family: Calibri; 
+ background-color: #F5F5F5;
 }
 pre{
- color: #708090;
- background-color: #F8F8FF;
+ color: #FFFFFF;
+ background-color: #F5F5F5;
 }
 </style>
 ```
@@ -54,10 +55,11 @@ knitr::opts_chunk$set(fig.align = 'center',
 ```
 
 ## MaAsLin2
+
 [MaAsLin2](https://github.com/biobakery/biobakery/wiki/maaslin2) is to efficiently determine multivariable association between phenotypes, environments, exposures, covariates and microbial meta-omics features.
 
-
 ## Install MaAsLin2 with Bioconductor
+
 ```{r message=FALSE}
 
 # if(!requireNamespace("BiocManager", quietly = TRUE))
@@ -136,7 +138,7 @@ all_results <- fit_data2$results #extract coefficients and q-value
 
 ```
 
-### Evaluate significant genus based on model parameters 
+### Evaluate significant genus based on model parameters
 
 significant associations is provided in 'significant_results.tsv'
 
