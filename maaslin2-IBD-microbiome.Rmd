@@ -61,9 +61,6 @@ knitr::opts_chunk$set(fig.align = 'center',
                       message=FALSE) #stop render when error occurs   
 ```
 
-## MaAsLin2
-
-[MaAsLin2](https://github.com/biobakery/biobakery/wiki/maaslin2) is to efficiently determine multivariable association between phenotypes, environments, exposures, covariates and microbial meta-omics features.
 
 ## Install MaAsLin2 with Bioconductor
 
