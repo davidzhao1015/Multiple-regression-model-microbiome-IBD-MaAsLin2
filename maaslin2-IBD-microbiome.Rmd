@@ -12,15 +12,16 @@ output:
     theme: united
     highlight: tango
     # css: styles.css 
-    toc: yes
-    toc_float: yes
+    toc: true
+    toc_float: true
      # collapsed: false
      # smooth_scroll: false 
-  toc_depth: 3
+  toc_depth: 2
   number_sections: true
-  # fig_width: 7
-  # fig_height: 6
-  # fig_caption: true
+  fig_width: 7
+  fig_height: 6
+  fig_caption: true
+  df_print: paged
 ---
 
 
