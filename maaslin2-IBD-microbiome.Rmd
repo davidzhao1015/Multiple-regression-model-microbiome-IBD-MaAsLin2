@@ -96,7 +96,7 @@ input_metadata <- system.file("extdata",
 
 ```
 
-```{r message=FALSE, results='hide',collapse=TRUE}
+```{r message=FALSE, results='hide', collapse=TRUE}
  
 # relative abundance data 
 df_input_data <- read.table(file = input_data,
@@ -119,6 +119,69 @@ df_input_path <- data.frame(read.csv("./pathabundance_relab.tsv",
                                      row.names = 1))
 
 ```
+
+### Exploratory data analysis
+```{r EDA, echo=FALSE}
+
+# descriptive stats for top 20 abundant genus 
+df_input_data_long <- df_input_data %>%
+  rownames_to_column("sample") %>%
+  gather(key="genus", value="rel_abund", -sample) 
+
+summary_genus <- df_input_data_long %>% 
+  group_by(genus) %>%
+  summarise(average = mean(rel_abund, na.rm=TRUE)*100,
+            std = sd(rel_abund, na.rm=TRUE)*100,
+            zero_rate = mean(rel_abund == 0)*100)%>%
+  arrange(desc(average)) %>%
+  head(20)  # top 20 genus based on average relative abundance 
+
+
+# display summary of relative abundance at genus level in a table 
+knitr::kable(summary_genus, 
+      col.names = c("Genus",
+                    "Average percentage",
+                    "Standard deviation",
+                    "Zeroness percentage")) 
+
+
+# structure of metadata 
+str(df_input_metadata)
+
+
+
+# descriptive stats of pathway data set 
+transp_input_path <- data.frame(t(df_input_path)) # transpose df 
+
+transp_input_path_long <- transp_input_path %>%
+  rownames_to_column("sample") %>%
+  gather(key="pathway", value="rel_abund", -sample) # reshape to a long format 
+
+
+summary_path <- transp_input_path_long %>% 
+  group_by(pathway) %>%
+  summarise(average = mean(rel_abund, na.rm=TRUE),
+            std = sd(rel_abund, na.rm=TRUE),
+            zero_rate = mean(rel_abund == 0)*100)%>%
+  arrange(desc(average)) %>%
+  head(20)  # top 20 pathways based on average relative abundance 
+
+
+knitr::kable(summary_path, 
+      col.names = c("Pathway",
+                    "Average",
+                    "Standard deviation",
+                    "Zeroness percentage")) 
+
+
+```
+
+
+
+
+
+
+
 
 ### Fit mutiple linear regression model on microbiome data
 
