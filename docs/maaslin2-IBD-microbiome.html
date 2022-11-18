@@ -1544,13 +1544,6 @@ pre{
  background-color: #FFFFFF;
 }
 </style>
-<div id="maaslin2" class="section level2">
-<h2>MaAsLin2</h2>
-<p><a href="https://github.com/biobakery/biobakery/wiki/maaslin2">MaAsLin2</a>
-is to efficiently determine multivariable association between
-phenotypes, environments, exposures, covariates and microbial meta-omics
-features.</p>
-</div>
 <div id="install-maaslin2-with-bioconductor" class="section level2">
 <h2>Install MaAsLin2 with Bioconductor</h2>
 <pre class="r"><code># if(!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE))
@@ -1586,6 +1579,297 @@ df_input_path &lt;- data.frame(read.csv(&quot;./pathabundance_relab.tsv&quot;,
                                      sep = &quot;\t&quot;, 
                                      stringsAsFactors = F, 
                                      row.names = 1))</code></pre>
+</div>
+<div id="exploratory-data-analysis" class="section level3">
+<h3>Exploratory data analysis</h3>
+<table>
+<colgroup>
+<col width="33%" />
+<col width="21%" />
+<col width="21%" />
+<col width="22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Genus</th>
+<th align="right">Average percentage</th>
+<th align="right">Standard deviation</th>
+<th align="right">Zeroness percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Faecalibacterium.prausnitzii</td>
+<td align="right">10.857784</td>
+<td align="right">11.375354</td>
+<td align="right">3.824451</td>
+</tr>
+<tr class="even">
+<td align="left">Bacteroides.uniformis</td>
+<td align="right">7.634667</td>
+<td align="right">10.245508</td>
+<td align="right">12.789969</td>
+</tr>
+<tr class="odd">
+<td align="left">Bacteroides.vulgatus</td>
+<td align="right">6.849525</td>
+<td align="right">9.978799</td>
+<td align="right">8.777430</td>
+</tr>
+<tr class="even">
+<td align="left">Bacteroides.stercoris</td>
+<td align="right">5.994028</td>
+<td align="right">10.787800</td>
+<td align="right">33.354232</td>
+</tr>
+<tr class="odd">
+<td align="left">Prevotella.copri</td>
+<td align="right">4.706690</td>
+<td align="right">14.987362</td>
+<td align="right">72.476489</td>
+</tr>
+<tr class="even">
+<td align="left">Eubacterium.rectale</td>
+<td align="right">3.921149</td>
+<td align="right">6.078478</td>
+<td align="right">17.366771</td>
+</tr>
+<tr class="odd">
+<td align="left">Bacteroides.ovatus</td>
+<td align="right">3.655636</td>
+<td align="right">6.239854</td>
+<td align="right">17.304075</td>
+</tr>
+<tr class="even">
+<td align="left">Alistipes.putredinis</td>
+<td align="right">3.107809</td>
+<td align="right">4.624586</td>
+<td align="right">41.065831</td>
+</tr>
+<tr class="odd">
+<td align="left">Subdoligranulum.unclassified</td>
+<td align="right">3.051139</td>
+<td align="right">4.269866</td>
+<td align="right">3.072100</td>
+</tr>
+<tr class="even">
+<td align="left">Bacteroides.fragilis</td>
+<td align="right">2.998254</td>
+<td align="right">7.843525</td>
+<td align="right">44.137931</td>
+</tr>
+<tr class="odd">
+<td align="left">Bacteroides.caccae</td>
+<td align="right">2.950091</td>
+<td align="right">4.472357</td>
+<td align="right">32.789969</td>
+</tr>
+<tr class="even">
+<td align="left">Roseburia.intestinalis</td>
+<td align="right">2.654642</td>
+<td align="right">7.967383</td>
+<td align="right">37.241379</td>
+</tr>
+<tr class="odd">
+<td align="left">Bacteroides.dorei</td>
+<td align="right">2.589942</td>
+<td align="right">8.744036</td>
+<td align="right">34.294671</td>
+</tr>
+<tr class="even">
+<td align="left">Bacteroides.massiliensis</td>
+<td align="right">1.896496</td>
+<td align="right">5.081670</td>
+<td align="right">63.824451</td>
+</tr>
+<tr class="odd">
+<td align="left">Parabacteroides.merdae</td>
+<td align="right">1.817327</td>
+<td align="right">3.067115</td>
+<td align="right">42.884012</td>
+</tr>
+<tr class="even">
+<td align="left">Bacteroides.thetaiotaomicron</td>
+<td align="right">1.776007</td>
+<td align="right">4.078621</td>
+<td align="right">29.717868</td>
+</tr>
+<tr class="odd">
+<td align="left">Escherichia.coli</td>
+<td align="right">1.640059</td>
+<td align="right">6.517029</td>
+<td align="right">38.871473</td>
+</tr>
+<tr class="even">
+<td align="left">Akkermansia.muciniphila</td>
+<td align="right">1.231392</td>
+<td align="right">5.187796</td>
+<td align="right">63.761755</td>
+</tr>
+<tr class="odd">
+<td align="left">Bacteroides.eggerthii</td>
+<td align="right">1.141981</td>
+<td align="right">4.863186</td>
+<td align="right">80.626959</td>
+</tr>
+<tr class="even">
+<td align="left">Parabacteroides.distasonis</td>
+<td align="right">1.123644</td>
+<td align="right">3.403687</td>
+<td align="right">41.379310</td>
+</tr>
+</tbody>
+</table>
+<pre><code>## &#39;data.frame&#39;:    1595 obs. of  11 variables:
+##  $ site            : chr  &quot;Cedars-Sinai&quot; &quot;Cedars-Sinai&quot; &quot;Cedars-Sinai&quot; &quot;Cedars-Sinai&quot; ...
+##  $ age             : int  43 43 76 43 76 76 76 76 76 47 ...
+##  $ diagnosis       : chr  &quot;CD&quot; &quot;CD&quot; &quot;CD&quot; &quot;CD&quot; ...
+##  $ subject         : chr  &quot;C3001&quot; &quot;C3001&quot; &quot;C3002&quot; &quot;C3001&quot; ...
+##  $ antibiotics     : chr  &quot;No&quot; &quot;No&quot; &quot;No&quot; &quot;No&quot; ...
+##  $ dysbiosis_binary: chr  &quot;No&quot; &quot;No&quot; &quot;Yes&quot; &quot;No&quot; ...
+##  $ dysbiosis       : num  0.792 0.838 0.924 0.83 0.911 ...
+##  $ dysbiosisnonIBD : chr  &quot;No&quot; &quot;No&quot; &quot;No&quot; &quot;No&quot; ...
+##  $ dysbiosisUC     : chr  &quot;No&quot; &quot;No&quot; &quot;No&quot; &quot;No&quot; ...
+##  $ dysbiosisCD     : chr  &quot;No&quot; &quot;No&quot; &quot;Yes&quot; &quot;No&quot; ...
+##  $ collection      : int  1 2 1 4 2 3 4 5 6 1 ...</code></pre>
+<table style="width:100%;">
+<colgroup>
+<col width="65%" />
+<col width="6%" />
+<col width="13%" />
+<col width="14%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th align="left">Pathway</th>
+<th align="right">Average</th>
+<th align="right">Standard deviation</th>
+<th align="right">Zeroness percentage</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">DTDPRHAMSYN.PWY..dTDP.L.rhamnose.biosynthesis.I</td>
+<td align="right">692.8135</td>
+<td align="right">253.99895</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="even">
+<td align="left">PWY.1042..glycolysis.IV..plant.cytosol.</td>
+<td align="right">567.4042</td>
+<td align="right">152.74022</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="odd">
+<td align="left">PWY.7219..adenosine.ribonucleotides.de.novo.biosynthesis</td>
+<td align="right">544.5894</td>
+<td align="right">136.28894</td>
+<td align="right">0.0000000</td>
+</tr>
+<tr class="even">
+<td align="left">PWY.6609..adenine.and.adenosine.salvage.III</td>
+<td align="right">509.9137</td>
+<td align="right">123.23269</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="odd">
+<td align="left">PWY.5686..UMP.biosynthesis</td>
+<td align="right">505.1302</td>
+<td align="right">125.30602</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="even">
+<td align="left">PWY.7221..guanosine.ribonucleotides.de.novo.biosynthesis</td>
+<td align="right">487.5871</td>
+<td align="right">113.66291</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="odd">
+<td align="left">PWY.5695..urate.biosynthesis.inosine.5..phosphate.degradation</td>
+<td align="right">484.5487</td>
+<td align="right">116.21726</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="even">
+<td align="left">PWY.6387..UDP.N.acetylmuramoyl.pentapeptide.biosynthesis.I..meso.diaminopimelate.containing.</td>
+<td align="right">474.0256</td>
+<td align="right">120.05323</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="odd">
+<td align="left">PWY.6386..UDP.N.acetylmuramoyl.pentapeptide.biosynthesis.II..lysine.containing.</td>
+<td align="right">465.2352</td>
+<td align="right">115.98417</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="even">
+<td align="left">PEPTIDOGLYCANSYN.PWY..peptidoglycan.biosynthesis.I..meso.diaminopimelate.containing.</td>
+<td align="right">462.9169</td>
+<td align="right">116.63632</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="odd">
+<td align="left">PWY.6385..peptidoglycan.biosynthesis.III..mycobacteria.</td>
+<td align="right">461.7691</td>
+<td align="right">112.31728</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="even">
+<td align="left">TRNA.CHARGING.PWY..tRNA.charging</td>
+<td align="right">460.9471</td>
+<td align="right">93.29268</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="odd">
+<td align="left">PWY.6700..queuosine.biosynthesis</td>
+<td align="right">450.6886</td>
+<td align="right">110.49128</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="even">
+<td align="left">PWY.6122..5.aminoimidazole.ribonucleotide.biosynthesis.II</td>
+<td align="right">440.7324</td>
+<td align="right">107.28578</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="odd">
+<td align="left">PWY.6277..superpathway.of.5.aminoimidazole.ribonucleotide.biosynthesis</td>
+<td align="right">440.7324</td>
+<td align="right">107.28578</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="even">
+<td align="left">PWY.6163..chorismate.biosynthesis.from.3.dehydroquinate</td>
+<td align="right">432.7614</td>
+<td align="right">96.55351</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="odd">
+<td align="left">COA.PWY.1..coenzyme.A.biosynthesis.II..mammalian.</td>
+<td align="right">432.7319</td>
+<td align="right">93.48008</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="even">
+<td align="left">PWY.3841..folate.transformations.II</td>
+<td align="right">430.9440</td>
+<td align="right">88.99289</td>
+<td align="right">0.1253918</td>
+</tr>
+<tr class="odd">
+<td align="left">RIBOSYN2.PWY..flavin.biosynthesis.I..bacteria.and.plants.</td>
+<td align="right">429.3896</td>
+<td align="right">121.17551</td>
+<td align="right">0.0626959</td>
+</tr>
+<tr class="even">
+<td align="left">PWY0.1319..CDP.diacylglycerol.biosynthesis.II</td>
+<td align="right">417.3223</td>
+<td align="right">93.08424</td>
+<td align="right">0.1880878</td>
+</tr>
+</tbody>
+</table>
 </div>
 <div id="fit-mutiple-linear-regression-model-on-microbiome-data" class="section level3">
 <h3>Fit mutiple linear regression model on microbiome data</h3>
