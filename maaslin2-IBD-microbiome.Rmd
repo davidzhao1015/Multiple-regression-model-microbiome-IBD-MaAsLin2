@@ -9,20 +9,18 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
   html_document:
-    theme: spacelab
-    highlight: tango
-    #css: styles.css
-    toc: true
-    toc_float: true
-     collapsed: false
-     smooth_scroll: false 
+    # theme: null
+    # highlight: null
+    css: styles.css 
+    toc: yes
+    toc_float: yes
+     # collapsed: false
+     # smooth_scroll: false 
   toc_depth: 3
   number_sections: true
-  fig_width: 7
-  fig_height: 6
-  fig_caption: true
-  df_print: paged
-  code_folding: hide
+  # fig_width: 7
+  # fig_height: 6
+  # fig_caption: true
 ---
 
 
