@@ -11,7 +11,7 @@ output:
   html_document:
     theme: united
     highlight: tango
-    css: styles.css 
+    # css: styles.css 
     toc: yes
     toc_float: yes
      # collapsed: false
