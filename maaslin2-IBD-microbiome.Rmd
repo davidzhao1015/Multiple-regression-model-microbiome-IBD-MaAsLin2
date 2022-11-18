@@ -147,8 +147,6 @@ summary_genus <- df_input_data_long %>%
 ```{r data table}
 # display summary of relative abundance at genus level in a table 
 
-rmarkdown::html_document(df_print = knitr::kable)  # df_print option 
-
 knitr::kable(summary_genus, 
       col.names = c("Genus",
                     "Average percentage",
@@ -186,12 +184,6 @@ knitr::kable(summary_path,
                     "Zeroness percentage")) 
 
 ```
-
-
-
-
-
-
 
 
 ### Fit mutiple linear regression model on microbiome data
