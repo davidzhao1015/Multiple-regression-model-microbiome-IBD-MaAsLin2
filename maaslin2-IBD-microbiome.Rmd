@@ -142,16 +142,21 @@ summary_genus <- df_input_data_long %>%
             zero_rate = mean(rel_abund == 0)*100)%>%
   arrange(desc(average)) %>%
   head(20)  # top 20 genus based on average relative abundance 
+```
 
-
+```{r data table}
 # display summary of relative abundance at genus level in a table 
+
+rmarkdown::html_document(df_print = knitr::kable)  # df_print option 
+
 knitr::kable(summary_genus, 
       col.names = c("Genus",
                     "Average percentage",
                     "Standard deviation",
                     "Zeroness percentage")) 
+```
 
-
+```{r}
 # structure of metadata 
 str(df_input_metadata)
 
@@ -179,7 +184,6 @@ knitr::kable(summary_path,
                     "Average",
                     "Standard deviation",
                     "Zeroness percentage")) 
-
 
 ```
 
