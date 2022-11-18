@@ -9,9 +9,9 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
   html_document:
-    # theme: null
-    # highlight: null
-    css: styles.css 
+    theme: united
+    highlight: tango
+    # css: styles.css 
     toc: yes
     toc_float: yes
      # collapsed: false
