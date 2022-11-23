@@ -9,6 +9,7 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
   html_document:
+    df_print: paged
     theme: united
     highlight: tango
     # css: styles.css 
@@ -81,6 +82,7 @@ library(knitr)
 library(janitor)
 library(lazyeval)
 library(rlang)
+library(rmarkdown) #create paged tables 
 
 ```
 
@@ -249,7 +251,7 @@ df_sum_cat <- as.data.frame(do.call(rbind, sum_cat))
 ```
 
 
-```{r}
+```{r, results='hide'}
 
 str(df_input_metadata)
 
@@ -364,7 +366,6 @@ anova_num <- function(x){
 }
 
 
-
 df_pval_num <- data.frame(covariable = num_names, 
                           pvalue = numeric(length = length(num_names)))   #create empty df to store p-values 
 
@@ -377,7 +378,6 @@ df_all_cov_pval <- df_all_cov %>%
   left_join(df_pval_num, by="covariable") %>% 
   left_join(df_pval_cat, by="covariable")  
 
-
 df_all_cov_pval$pvalue.x <- if_else(!is.na(df_all_cov_pval$pvalue.x), 
                             df_all_cov_pval$pvalue.x,
                             df_all_cov_pval$pvalue.y)  
@@ -388,10 +388,10 @@ df_all_cov_pval$covariable <- if_else(!is.na(df_all_cov_pval$covariable),
 
 df_all_cov_pval2 <- df_all_cov_pval %>% select(-pvalue.y) %>% rename(pvalue = pvalue.x) 
 
-
-print(df_all_cov_pval2) 
+df_all_cov_pval2 #view the resulting table
 
 ```
+
 
 ```{r}
 # descriptive stats of pathway data set 
