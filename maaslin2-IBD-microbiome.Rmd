@@ -10,8 +10,8 @@ knit: (function(inputFile, encoding) {
 output:
   html_document:
     df_print: paged
-    theme: united
-    highlight: tango
+    theme: paper
+    highlight: pygments
     # css: styles.css 
     toc: true
     toc_float: true
