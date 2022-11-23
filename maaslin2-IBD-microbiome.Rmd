@@ -60,9 +60,12 @@ pre{
 }
 </style>
 ```
+
 ```{r setup, include = FALSE}
 # set options for the entire document 
 knitr::opts_chunk$set(fig.align = 'center', 
+                      fig.dim =c(6,4), 
+                      dev="png",
                       echo=TRUE, #display code in output document 
                       error=FALSE,
                       message=FALSE) #stop render when error occurs   
@@ -132,13 +135,12 @@ df_input_path <- data.frame(read.csv("./pathabundance_relab.tsv",
 ```
 
 ### Exploratory data analysis
-
-```{r EDA, echo=FALSE}
-
+Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations and rate of missing values 
+```{r EDA-microbiome abundance data, echo=FALSE}
 # descriptive stats for top 20 abundant genus 
 df_input_data_long <- df_input_data %>%
   rownames_to_column("sample") %>%
-  gather(key="genus", value="rel_abund", -sample) 
+  gather(key="genus", value="rel_abund", -sample) #reshape short to long data frame 
 
 summary_genus <- df_input_data_long %>% 
   group_by(genus) %>%
@@ -147,22 +149,70 @@ summary_genus <- df_input_data_long %>%
             zero_rate = mean(rel_abund == 0)*100)%>%
   arrange(desc(average)) %>%
   head(20)  # top 20 genus based on average relative abundance 
-```
 
-```{r data table}
+
 # display summary of relative abundance at genus level in a table 
 knitr::kable(summary_genus, 
       col.names = c("Genus",
                     "Average percentage",
                     "Standard deviation",
                     "Zeroness percentage")) 
-```
-
-```{r descriptive stats for meta-data, echo=FALSE}
-
-summary(df_input_metadata) #structure of metadata 
 
 ```
+
+
+```{r}
+# structure of metadata 
+str(df_input_metadata)
+
+df_input_metadata # print paged table 
+
+```
+
+
+Visualize relationship between representative genus and dysbiosis (continuous variable), stratified by diagnosis status
+```{r scatter plot-microbiome vs dysbiosis}
+
+#extract top 10 genus with highest average of relative abundance 
+top10_g <- summary_genus %>% 
+  arrange(desc(average)) %>% 
+  head(10) %>% 
+  pull(genus)
+
+#select top 10 representative genus 
+df_input_data_top <- df_input_data %>% 
+  select(all_of(top10_g)) %>% 
+  rownames_to_column("subject_id")
+
+#subset dysbiosis and diagnosis variables 
+df_input_metadata_sub <- df_input_metadata %>% 
+  select(diagnosis, dysbiosis) %>% 
+  rownames_to_column("subject_id") 
+
+#merge microbiome data and metadata 
+merge_micro_meta_top <- df_input_data_top %>% 
+  inner_join(df_input_metadata_sub, by="subject_id")
+
+```
+
+
+```{r plot, message=FALSE, fig.cap='Relationship between representative top genus and diagnosis'}
+# scatter plot given genus vs dysbiosis with faceting by diagnosis status (for instance, F. prausnitzii)
+require(RColorBrewer)
+
+ggplot(merge_micro_meta_top, aes(x= dysbiosis, 
+                                 y=Faecalibacterium.prausnitzii,
+                                 color=diagnosis))+
+  geom_point(alpha=0.7)+
+  geom_smooth(method = "lm",
+              se=FALSE)+
+  scale_color_brewer(palette = "Dark2")+
+  theme_minimal()
+  
+
+```
+
+
 
 There were 11 covariates in mete-data as follows, 
 `age`, `dysbiosis`, and `collection` were numerical variables; and `site`, `diagnosis`, `subject`, `antibiotics`, `dysbiosis_binary`, `dysbiosisnonIBD`, `dysbiosisUC`, `dysbiosisCD` were character variables. 
@@ -393,7 +443,8 @@ df_all_cov_pval2 #view the resulting table
 ```
 
 
-```{r}
+Conduct descriptive statistics for pathway data set, printing the resultant table
+```{r, echo=FALSE}
 # descriptive stats of pathway data set 
 transp_input_path <- data.frame(t(df_input_path)) # transpose df 
 
