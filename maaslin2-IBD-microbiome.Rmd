@@ -496,7 +496,7 @@ sig_results <- all_results %>%
         filter(qval <= 0.05) %>% #sig threshold 
         arrange(qval)
 
-head(sig_results, 5) #view first rows 
+sig_results
 
 ```
 
