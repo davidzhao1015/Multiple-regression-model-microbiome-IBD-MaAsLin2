@@ -11,7 +11,7 @@ output:
  html_document:
   theme: 
    bootswatch: solar
-  highlight: tango
+  # highlight: tango
     # css: styles.css 
   toc: TRUE
   toc_float: FALSE
