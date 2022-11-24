@@ -404,8 +404,6 @@ df_pval_cat <- data.frame(covariable = cat_cov,
 df_pval_cat$pvalue <- sapply(cat_cov, chi_square) 
 
 
-
-
 #write a function to do anova to numerical variables against diagnosis 
 anova_num <- function(x){
   f <- paste0(x, "~", "diagnosis")
@@ -417,12 +415,10 @@ anova_num <- function(x){
   print(pval_digit)
 }
 
-
 df_pval_num <- data.frame(covariable = num_names, 
                           pvalue = numeric(length = length(num_names)))   #create empty df to store p-values 
 
 df_pval_num$pvalue <- sapply(num_names, anova_num) 
-
 
 
 #join p-values with descriptive stats table 
@@ -471,7 +467,16 @@ knitr::kable(summary_path,
 
 
 ### Fit mutiple linear regression model on microbiome data
-The following command runs MaAsLin2 on the HMP2 data, running a multivariable regression model to test for the association between microbial species abundance versus IBD diagnosis and dysbiosis scores.
+Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) versus two clinical variables, IBD diagnosis and dysbiosis scores. 
+
+Key arguments were set as followings, 
+- linear regression was used for data modeling `analysis_method` = `LM` 
+- set the minimal threshold for taxa prevalence as 0.1 `min_prevalence` = `0.1`
+- set the minimal threshold for taxa relative abundance as 0.01% `min_abundance` = `0.0001`
+- fixed effect variables `fixed_effects` = `c("diagnosis", "dysbiosis")`
+- random effect variable `random_effects` = `c("subject")`  
+
+
 ```{r message=FALSE,results='hide',collapse=TRUE}
 fit_data2 <- Maaslin2(
         input_data = df_input_data,
@@ -484,12 +489,14 @@ fit_data2 <- Maaslin2(
         plot_heatmap = FALSE,
         plot_scatter = FALSE,
         analysis_method = "LM",  #linear regression model 
-        fixed_effects = c("diagnosis", "dysbiosis"),  #set diagnosis and dysbiosis as fixed effect variables 
+        fixed_effects = c("diagnosis", "dysbiosis"), # fixed effect variables, diagnosis and dysbiosis 
+        random_effects = c("subject"), # random effect variable  
         reference = c("diagnosis,nonIBD")) #set the baseline for the categorical variable, diagnosis 
 
 all_results <- fit_data2$results #extract coefficients and q-value
 
 ```
+
 
 ### Evaluate significant genus based on model parameters
 significant associations is provided in 'significant_results.tsv'
@@ -500,7 +507,9 @@ sig_results <- all_results %>%
 
 sig_results
 
+
 ```
+
 
 Draw a volcano plot to illustrate q-values and coefficients 
 ```{r volcano plot qval and coeff, warning=FALSE, include=TRUE}
