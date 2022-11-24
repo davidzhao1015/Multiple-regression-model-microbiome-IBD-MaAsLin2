@@ -12,9 +12,8 @@ output:
     theme: cerulean
     df_print: paged
     toc: TRUE
-    toc_depth: 2
     toc_float: TRUE
-    # number_sections: TRUE
+    number_sections: TRUE
     # fig_width: 7
     # fig_height: 6
     # fig_caption: TRUE
