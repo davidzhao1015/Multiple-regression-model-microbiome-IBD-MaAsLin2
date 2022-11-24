@@ -9,20 +9,20 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
  html_document:
-   theme: simplex
-   #  bootswatch: solar
-   highlight: tango
-    # css: styles.css 
-  toc: TRUE
-  toc_float: TRUE
-     collapsed: FALSE
-     smooth_scroll: FALSE 
-  toc_depth: 2
-  number_sections: TRUE
-  fig_width: 7
-  fig_height: 6
-  fig_caption: TRUE
   df_print: paged
+  theme: cerulean
+  highlight: tango
+   #  toc: TRUE
+   #  toc_float: TRUE
+   #   collapsed: FALSE
+   #   smooth_scroll: FALSE
+   # toc_depth: 2
+   # number_sections: TRUE
+   # fig_width: 7
+   # fig_height: 6
+   # fig_caption: TRUE
+
+
 ---
 
 ```{=html}
