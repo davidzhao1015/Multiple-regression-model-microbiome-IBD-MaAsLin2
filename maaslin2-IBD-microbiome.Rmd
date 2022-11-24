@@ -8,58 +8,17 @@ knit: (function(inputFile, encoding) {
                         encoding=encoding, 
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
- html_document:
-  df_print: paged
-  theme: cerulean
-  highlight: tango
-   #  toc: TRUE
-   #  toc_float: TRUE
-   #   collapsed: FALSE
-   #   smooth_scroll: FALSE
-   # toc_depth: 2
-   # number_sections: TRUE
-   # fig_width: 7
-   # fig_height: 6
-   # fig_caption: TRUE
-
+  html_document:
+    theme: cosmo
+    df_print: paged
+    toc: TRUE
+    toc_float: TRUE
+    number_sections: TRUE
+    fig_width: 7
+    fig_height: 6
+    fig_caption: TRUE
 
 ---
-
-```{=html}
-<style>
-#TOC{
- color: #7E7C73;
- font-family: Calibri;
- font-size: 16px;
- border-color: #BBC4C2;
-}
-h1.title{
- color: #140005;
- background-color: #F5F5F5;
- opacity: 0.6;
- font-family: Calibri;
- font-size: 30px;
-}
-h4.author{
- color: #464033;
- font-family: Calibri;
- font-size: 25px;
-}
-h4.date{
- color: #464033;
- font-family:Calibri; 
-}
-body{
- color: #464033; 
- font-family: Calibri; 
- background-color: #F5F5F5;
-}
-pre{
- color: #464033;
- background-color: #FFFFFF;
-}
-</style>
-```
 
 ```{r setup, include = FALSE}
 # set options for the entire document 
@@ -537,8 +496,9 @@ qval_Fae <- all_results_sig %>%
 
 *F. prausnitzii* is negatively associated with `dysbiosis` (q value = `r qval_Fae`). In particularly, *F. prausnitzii* percentage in feces may decrease by `r abs(coef_Fae)` on average when `dysbiosis` scores increases by 1 unit independent of `diagnosis` status. 
 
-## Session information
+
 ```{r package version info}
+# Sessoin information 
 sessionInfo()  
 ```
 
