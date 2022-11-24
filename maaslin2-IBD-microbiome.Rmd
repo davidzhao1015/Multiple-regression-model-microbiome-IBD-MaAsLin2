@@ -9,8 +9,7 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
  html_document:
-  theme: 
-   bootswatch: solar
+   theme: paper
   # highlight: tango
     # css: styles.css 
   toc: TRUE
@@ -87,6 +86,11 @@ library(janitor) # create descripitive stats table
 library(rmarkdown) # create paged tables 
 library(ggrepel) # organize labels nicely 
 library(ggplot2)
+library(bslib) # bootswatch themes 
+
+# use the function below to list available html output themes 
+# bslib::bootswatch_themes()
+# ?bs_theme to see more variables adjustable in html themes 
 
 ```
 
