@@ -72,7 +72,7 @@ knitr::opts_chunk$set(fig.align = 'center',
 ```
 
 ## Install MaAsLin2 with Bioconductor
-
+The scripts was built with `r gerRversion()`. 
 ```{r message=FALSE}
 
 # if(!requireNamespace("BiocManager", quietly = TRUE))
@@ -442,6 +442,7 @@ df_all_cov_pval2 #view the resulting table
 
 
 Conduct descriptive statistics for pathway data set, printing the resultant table
+
 ```{r, echo=FALSE}
 # descriptive stats of pathway data set 
 transp_input_path <- data.frame(t(df_input_path)) # transpose df 
@@ -466,8 +467,9 @@ knitr::kable(summary_path,
 ```
 
 
-### Fit mutiple linear regression model on microbiome data
-Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) versus two clinical variables, IBD diagnosis and dysbiosis scores. 
+
+### Fit a mutiple regression model on microbiome and clinical variables
+Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status. 
 
 Key arguments were set as followings, 
 - linear regression was used for data modeling `analysis_method` = `LM` 
@@ -475,7 +477,9 @@ Key arguments were set as followings,
 - set the minimal threshold for taxa relative abundance as 0.01% `min_abundance` = `0.0001`
 - fixed effect variables `fixed_effects` = `c("diagnosis", "dysbiosis")`
 - random effect variable `random_effects` = `c("subject")`  
+- set the baseline for the categorical variable `diagnosis` `reference` = `c("diagnosis","nonIBD")`
 
+Note that MaAsLin2 can not yet handle interaction terms directly in model building. Alternatively, persons can add additional interactive covariables in the input data frame prior to modeling. 
 
 ```{r message=FALSE,results='hide',collapse=TRUE}
 fit_data2 <- Maaslin2(
@@ -499,34 +503,29 @@ all_results <- fit_data2$results #extract coefficients and q-value
 
 
 ### Evaluate significant genus based on model parameters
-significant associations is provided in 'significant_results.tsv'
+significant associations is provided in `significant_results.tsv`
+
 ```{r}
 sig_results <- all_results %>% 
-        filter(qval <= 0.05) %>% #sig threshold 
+        filter(qval <= 0.05) %>% #sig threshold q value = 0.05 
         arrange(qval)
 
-sig_results
+sig_results  # print in the paged table format 
 
 
 ```
 
 
 Draw a volcano plot to illustrate q-values and coefficients 
-```{r volcano plot qval and coeff, warning=FALSE, include=TRUE}
-require(ggrepel) 
-
-# the basic plot plot: x is "coef", y is "-log10qval" 
-ggplot(all_results,
-       aes(x=coef, y=-log10(qval)))+
-  geom_point()
-
+```{r volcano plot qval and coeff, warning=FALSE, include=TRUE, fig.cap='Illustration of coefficients and q-values of diagnosis scores for individual species'}
 # add a column to indicate significant genus 
 all_results_sig <- all_results %>% 
   mutate(whether_sig = case_when(coef >= 0.3 & qval <= 0.05 ~ "Positive",
                                  coef <= -0.3 & qval <= 0.05 ~ "Negative",
                                  abs(coef) < 0.3 | qval >0.05 ~ "No association")) 
 
-# add label 
+
+# add label column 
 all_results_sig$relabel <- NA
 
 all_results_sig$relabel[all_results_sig$whether_sig != "No association"] <- all_results_sig$feature[all_results_sig$whether_sig != "No association"]
@@ -535,15 +534,57 @@ all_results_sig$relabel[all_results_sig$whether_sig != "No association"] <- all_
 mycolors <- c("blue", "red", "black")
 names(mycolors) <- c("Negative", "Positive", "No association") 
 
-ggplot(all_results_sig, 
-       aes(x=coef, y=-log10(qval),
+# volcano plot 
+all_results_sig %>% 
+  filter(value == "dysbiosis") %>% #focus on dysbiosis 
+ggplot(aes(x=coef, y=-log10(qval),
            color=whether_sig,
            label=relabel))+
   geom_point()+
   geom_vline(xintercept = c(-0.3, 0.3), color="red")+
   geom_hline(yintercept = -log10(0.05), color="red")+
   scale_color_manual(values = mycolors)+
+  theme_minimal()+ 
   geom_text_repel() #label taxa names 
 
 ```
+
+###Interpretation of model coefficients 
+Use `Faecalibacterium.prausnitzii` as an example for model interpretation. 
+```{r}
+coef_Fae <- all_results_sig %>% 
+  filter(value == "dysbiosis") %>%
+  filter(feature == "Faecalibacterium.prausnitzii") %>%
+  select(coef) %>% 
+  pull() %>%
+  round(., 3) 
+
+qval_Fae <- all_results_sig %>% 
+  filter(value == "dysbiosis") %>%
+  filter(feature == "Faecalibacterium.prausnitzii") %>%
+  select(qval) %>% 
+  pull() %>%
+  format(., scientific=TRUE) 
+```
+
+*F. prausnitzii* is negatively associated with `dysbiosis` (q value = `r qval_Fae`). In particularly, *F. prausnitzii* percentage in feces may decrease by `r abs(coef_Fae)` on average when `dysbiosis` scores increases by 1 unit independent of `diagnosis` status. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
