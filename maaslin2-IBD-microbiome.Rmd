@@ -1,5 +1,5 @@
 ---
-title: "Multivariable regression of microbiome and IBD using MaAsLin2 R package"
+title: "Multiple regression of microbiome and IBD-related variables using HMP datasets"
 author: "David Xin Zhao"
 date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
 knit: (function(inputFile, encoding) { 
@@ -9,7 +9,8 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
  html_document:
-  theme: paper
+  theme: 
+   bootswatch: solar
   highlight: tango
     # css: styles.css 
   toc: TRUE
@@ -70,29 +71,31 @@ knitr::opts_chunk$set(fig.align = 'center',
                       message=FALSE) #stop render when error occurs   
 ```
 
-## Install MaAsLin2 with Bioconductor
-The scripts was built with R `r getRversion()`.
+
+This project was built with R `r getRversion()`.
 ```{r load libraries, message=FALSE, warning=FALSE}
 
+# libraries loaded 
 # if(!requireNamespace("BiocManager", quietly = TRUE))
 #     install.packages("BiocManager")
 # BiocManager::install("Maaslin2")
 
-library(Maaslin2) #version 
+library(Maaslin2) # implement multivariate regression 
 library(tidyverse)
 library(knitr)
-library(janitor)
-library(lazyeval)
-library(rlang)
-library(rmarkdown) #create paged tables 
-library(ggrepel) #organize labels nicely 
+library(janitor) # create descripitive stats table 
+library(rmarkdown) # create paged tables 
+library(ggrepel) # organize labels nicely 
 library(ggplot2)
 
-sessionInfo() 
+# sessionInfo() 
 
 ```
 
-## Date sets 
+# Data preprocessing
+## Raw datasets 
+
+Set the folder location for the microbiome abundance data set 
 ```{r}
 input_data <- system.file("extdata",
                           "HMP2_taxonomy.tsv",
@@ -100,6 +103,7 @@ input_data <- system.file("extdata",
 
 ```
 
+Set the folder location for the meta data set 
 ```{r metadata location}
 input_metadata <- system.file("extdata",
                               "HMP2_metadata.tsv",
@@ -107,7 +111,7 @@ input_metadata <- system.file("extdata",
 
 ```
 
-
+Read in the microbiome abundance data 
 ```{r microbiom data, collapse=TRUE}
 
 df_input_data <- read.table(file = input_data,
@@ -116,10 +120,10 @@ df_input_data <- read.table(file = input_data,
                             row.names = 1,
                             stringsAsFactors = FALSE) 
 
-head(df_input_data, 5)
+head(df_input_data, 5) # view first rows 
 ```
 
-
+Read in the metadata 
 ```{r metadata}
 
 df_input_metadata <- read.table(file=input_metadata,
@@ -128,13 +132,12 @@ df_input_metadata <- read.table(file=input_metadata,
                                 row.names = 1,
                                 stringsAsFactors = F) 
 
-head(df_input_metadata, 5)
+head(df_input_metadata, 5) # view first rows 
 ```
 
 
 ## Exploratory data analysis
-Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations\ 
-and rate of missing values 
+Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations and rate of missing values 
 ```{r EDA-microbiome abundance data}
 # descriptive stats for top 20 abundant genus 
 df_input_data_long <- df_input_data %>%
@@ -164,7 +167,7 @@ kable(summary_genus,
 
 
 ```{r}
-# structure of metadata 
+# inspect metadata 
 
 df_input_metadata # print paged table 
 
@@ -257,7 +260,7 @@ df_site <- tabyl(df_input_metadata, site, diagnosis) %>%
 ```
 
 Follow the instruction in [programming with dyplyr](<https://dplyr.tidyverse.org/articles/programming.html>)
-```{r build a function, include=TRUE} 
+```{r build a function, echo=FALSE} 
 
 #write a function to generate a summary table for covariates 
 count_pct <- function(x){
@@ -279,9 +282,6 @@ count_pct <- function(x){
   data2 %>%
     filter(row_number() != n())
 } 
-
-count_pct("site")  #the function works properly  
-
 
 ```
 
@@ -347,7 +347,7 @@ numerical_summary("age") #the resulting function works properly
 ```
 
 Apply the function `numerical_summary` to all the numerical variables in meta-data with `lapply`.  
-```{r, collapse=FALSE} 
+```{r, collapse=TRUE, results='hide'} 
 # extract column names for all the numerical variables in meta-data 
 num_names <- df_input_metadata %>% 
   select(where(is.numeric)) %>% 
@@ -355,7 +355,7 @@ num_names <- df_input_metadata %>%
 
 list_num_summary <- lapply(num_names, numerical_summary) 
   
-str(list_num_summary)
+# str(list_num_summary) 
 
 # convert individual element of the list to data frames and bind them into a single data frame 
 df_num_summary <- as.data.frame(do.call(rbind, list_num_summary)) 
@@ -364,9 +364,8 @@ df_num_summary <- as.data.frame(do.call(rbind, list_num_summary))
 
 Combine descriptive stats tables, `df_sum_cat` and `df_num_summary` for categorical and numerical covariables, respectively  
 ```{r}
-head(df_sum_cat, 3)
-head(df_num_summary, 3)
-
+# head(df_sum_cat, 3)
+# head(df_num_summary, 3)
 
 names(df_sum_cat)[5] <- "overall"  #rename the column name
 
@@ -393,7 +392,7 @@ chi_square <- function(x){
   
 }
 
-chi_square("site")
+# chi_square("site")
 
 df_pval_cat <- data.frame(covariable = cat_cov, 
                           pvalue = numeric(length = length(cat_cov)))   #create empty df to store p-values 
@@ -437,7 +436,7 @@ df_all_cov_pval2 #view the resulting table
 
 ```
 
-## Fit a mutiple regression model on microbiome and clinical variables
+# Fit the mdoel
 Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status.
 
 Key arguments were set as followings,\  
@@ -470,8 +469,7 @@ all_results <- fit_data2$results #extract coefficients and q-value
 
 ```
 
-
-### Evaluate significant genus based on model parameters
+## Significant taxa checkup
 significant associations is provided in `significant_results.tsv`
 
 ```{r}
@@ -481,9 +479,7 @@ sig_results <- all_results %>%
 
 sig_results  # print in the paged table format 
 
-
 ```
-
 
 Draw a volcano plot to illustrate q-values and coefficients 
 ```{r volcano plot qval and coeff, warning=FALSE, include=TRUE, fig.cap='Illustration of coefficients and q-values of diagnosis scores for individual species'}
@@ -518,7 +514,7 @@ ggplot(aes(x=coef, y=-log10(qval),
 
 ```
 
-## Interpretation of model coefficients 
+## Model interpretation
 Use `Faecalibacterium.prausnitzii` as an example for model interpretation. 
 ```{r}
 coef_Fae <- all_results_sig %>% 
