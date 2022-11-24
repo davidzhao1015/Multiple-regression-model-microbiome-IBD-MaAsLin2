@@ -95,8 +95,6 @@ library(rmarkdown) # create paged tables
 library(ggrepel) # organize labels nicely 
 library(ggplot2)
 
-# sessionInfo() 
-
 ```
 
 # Data preprocessing
@@ -541,7 +539,10 @@ qval_Fae <- all_results_sig %>%
 
 *F. prausnitzii* is negatively associated with `dysbiosis` (q value = `r qval_Fae`). In particularly, *F. prausnitzii* percentage in feces may decrease by `r abs(coef_Fae)` on average when `dysbiosis` scores increases by 1 unit independent of `diagnosis` status. 
 
-
+## Session information
+```{r package version info}
+sessionInfo()  
+```
 
 
 
