@@ -87,6 +87,7 @@ library(lazyeval)
 library(rlang)
 library(rmarkdown) #create paged tables 
 library(ggrepel) #organize labels nicely 
+library(ggplot2)
 
 ```
 
@@ -511,18 +512,18 @@ ggplot(all_results,
 
 # add a column to indicate significant genus 
 all_results_sig <- all_results %>% 
-  mutate(whether_sig = case_when(coef >= 0.3 & qval <= 0.05 ~ "Increase",
-                                 coef <= -0.3 & qval <= 0.05 ~ "Decrease",
-                                 abs(coef) < 0.3 | qval >0.05 ~ "No change")) 
+  mutate(whether_sig = case_when(coef >= 0.3 & qval <= 0.05 ~ "Positive",
+                                 coef <= -0.3 & qval <= 0.05 ~ "Negative",
+                                 abs(coef) < 0.3 | qval >0.05 ~ "No association")) 
 
 # add label 
 all_results_sig$relabel <- NA
 
-all_results_sig$relabel[all_results_sig$whether_sig != "No change"] <- all_results_sig$feature[all_results_sig$whether_sig != "No change"]
+all_results_sig$relabel[all_results_sig$whether_sig != "No association"] <- all_results_sig$feature[all_results_sig$whether_sig != "No association"]
 
 # set personal color palate 
 mycolors <- c("blue", "red", "black")
-names(mycolors) <- c("Decrease", "Increase", "No change") 
+names(mycolors) <- c("Negative", "Positive", "No association") 
 
 ggplot(all_results_sig, 
        aes(x=coef, y=-log10(qval),
@@ -532,19 +533,9 @@ ggplot(all_results_sig,
   geom_vline(xintercept = c(-0.3, 0.3), color="red")+
   geom_hline(yintercept = -log10(0.05), color="red")+
   scale_color_manual(values = mycolors)+
-  geom_text_repel()
-
+  geom_text_repel() #label taxa names 
 
 ```
-
-
-
-
-
-
-
-
-
 
 
 ### Fit multivariable regression models on functional data
