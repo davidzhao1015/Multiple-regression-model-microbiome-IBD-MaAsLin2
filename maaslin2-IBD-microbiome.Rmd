@@ -87,9 +87,10 @@ library(rlang)
 library(rmarkdown) #create paged tables 
 library(ggrepel) #organize labels nicely 
 library(ggplot2)
-```
-The information regarding the system, R, R studio and loaded libraries was here `r sessionInfo()`
 
+sessionInfo() 
+
+```
 
 ## Load data sets (use example datasets provided by MaAsLin2 package)
 ```{r include=FALSE}
