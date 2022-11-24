@@ -537,43 +537,6 @@ ggplot(all_results_sig,
 
 ```
 
-
-### Fit multivariable regression models on functional data
-
-Authors tend to work with CPM units because we find them to be more convenient, but they are numerically equivalent to relative abundances for modeling purposes (CPM = RA \* 1e6)
-
-Quick tips for using MaAsLin2 on functional profiles: 1.To reduce the number of features, you typically want to run either the unstratified functional features ( or a filtered subset of the stratified features) 2.You may also want to remove functional features that are highly correlated to one specific taxon (i.e. likely contributed by that microbe), since these can be better-explained by taxonomic changes
-```{r normalization, message=FALSE}
-
-#This can also be done with with the HUMAnN 3 untiliy `humann_split_stratified_table`
-unstrat_pathways <-function(dat_path){
-  temp = dat_path[!grepl("\\|",rownames(dat_path)),]
-  return(temp)
-}
-
-df_input_path = unstrat_pathways(df_input_path)
-
-```
-
-Run the same model as above on the MetaCyc pathway table generated from the bioBakery workflows.
-
-```{r message=FALSE,results='hide',collapse=TRUE}
-# fit the model on pathway (functional) data - it takes a few minutes  
-fit_func <- Maaslin2(
-        input_data = df_input_path,
-        input_metadata = df_input_metadata,
-        output = "demo_functional",
-        fixed_effects = c("diagnosis", "dysbiosis"),
-        reference=c("diagnosis,nonIBD"),
-        min_abundance = 0.0001,
-        min_prevalence = 0.1) 
-
-# note: here we have the samples in the columns and the features in the rows and MaAsLin2 correctly identified this and was able to match the samples. 
-
-all_results_func <- fit_func$results
-
-```
-
 ### Interactions
 
 Unfortunately, MaAsLin2 does not yet provide a direct interface for testing for interaction. Instead, the user needs to create artificial interaction columns as additional 'fixed_effects' terms.
