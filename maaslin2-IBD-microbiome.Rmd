@@ -1,5 +1,5 @@
 ---
-title: "Multivariable regression of microbiome and IBD using MaAsLin2 R package"
+title: "Multiple regression of microbiome and IBD-related variables using HMP datasets"
 author: "David Xin Zhao"
 date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
 knit: (function(inputFile, encoding) { 
@@ -8,20 +8,27 @@ knit: (function(inputFile, encoding) {
                         encoding=encoding, 
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
+<<<<<<< HEAD
+ html_document:
+  theme: 
+   bootswatch: solar
+  # highlight: tango
+=======
   html_document:
     df_print: paged
     theme: paper
     highlight: pygments
+>>>>>>> c7fcf0dfdf21ba1a81808068ae19b32e0160dc77
     # css: styles.css 
-    toc: true
-    toc_float: true
+  toc: TRUE
+  toc_float: FALSE
      # collapsed: false
      # smooth_scroll: false 
-  toc_depth: 2
-  number_sections: true
+  # toc_depth: 2
+  number_sections: TRUE
   fig_width: 7
   fig_height: 6
-  fig_caption: true
+  fig_caption: TRUE
   df_print: paged
 ---
 
@@ -71,73 +78,74 @@ knitr::opts_chunk$set(fig.align = 'center',
                       message=FALSE) #stop render when error occurs   
 ```
 
-## Install MaAsLin2 with Bioconductor
 
-```{r message=FALSE}
+This project was built with R `r getRversion()`.
+```{r load libraries, message=FALSE, warning=FALSE}
 
+# libraries loaded 
 # if(!requireNamespace("BiocManager", quietly = TRUE))
 #     install.packages("BiocManager")
 # BiocManager::install("Maaslin2")
 
-library(Maaslin2)
+library(Maaslin2) # implement multivariate regression 
 library(tidyverse)
 library(knitr)
-library(janitor)
-library(lazyeval)
-library(rlang)
-library(rmarkdown) #create paged tables 
-library(ggrepel) #organize labels nicely 
+library(janitor) # create descripitive stats table 
+library(rmarkdown) # create paged tables 
+library(ggrepel) # organize labels nicely 
+library(ggplot2)
+
+# sessionInfo() 
 
 ```
 
-## Multiple regression of microbiome and clincial covariates of interest
+# Data preprocessing
+## Raw datasets 
 
-### Load data sets (use example datasets provided by MaAsLin2 package)
-
-```{r include=FALSE}
-
-# set file pathway to abundance data 
+Set the folder location for the microbiome abundance data set 
+```{r}
 input_data <- system.file("extdata",
                           "HMP2_taxonomy.tsv",
                           package="Maaslin2") # the abundance table file 
 
-# set file pathway to meta data 
+```
+
+Set the folder location for the meta data set 
+```{r metadata location}
 input_metadata <- system.file("extdata",
                               "HMP2_metadata.tsv",
                               package = "Maaslin2")  # the metadata table file 
 
-# # get the pathway (functional) data 
-# download.file("https://raw.githubusercontent.com/biobakery/biobakery_workflows/master/examples/tutorial/stats_vis/input/pathabundance_relab.tsv", "./pathabundance_relab.tsv")
-
 ```
 
-```{r message=FALSE, results='hide', collapse=TRUE}
- 
-# relative abundance data 
+Read in the microbiome abundance data 
+```{r microbiom data, collapse=TRUE}
+
 df_input_data <- read.table(file = input_data,
                             header = TRUE,
                             sep = "\t",
                             row.names = 1,
                             stringsAsFactors = FALSE) 
 
-# meta data 
+head(df_input_data, 5) # view first rows 
+```
+
+Read in the metadata 
+```{r metadata}
+
 df_input_metadata <- read.table(file=input_metadata,
                                 header = T,
                                 sep="\t",
                                 row.names = 1,
                                 stringsAsFactors = F) 
 
-# pathway data 
-df_input_path <- data.frame(read.csv("./pathabundance_relab.tsv", 
-                                     sep = "\t", 
-                                     stringsAsFactors = F, 
-                                     row.names = 1))
-
+head(df_input_metadata, 5) # view first rows 
 ```
 
-### Exploratory data analysis
+
+## Exploratory data analysis
 Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations and rate of missing values 
-```{r EDA-microbiome abundance data, echo=FALSE}
+```{r EDA-microbiome abundance data}
 # descriptive stats for top 20 abundant genus 
 df_input_data_long <- df_input_data %>%
   rownames_to_column("sample") %>%
@@ -153,18 +161,20 @@ summary_genus <- df_input_data_long %>%
 
 
 # display summary of relative abundance at genus level in a table 
-knitr::kable(summary_genus, 
-      col.names = c("Genus",
+kable(summary_genus, 
+      col.names = c("Species",
                     "Average percentage",
                     "Standard deviation",
-                    "Zeroness percentage")) 
+                    "Zeroness percentage"),
+      caption = 'Descriptive statistics of top 20 abundant species',
+      format = 'html',
+      digits = 2) 
 
 ```
 
 
 ```{r}
-# structure of metadata 
-str(df_input_metadata)
+# inspect metadata 
 
 df_input_metadata # print paged table 
 
@@ -228,8 +238,6 @@ df_input_metadata$diagnosis <- factor(df_input_metadata$diagnosis,
                                       levels = c("nonIBD", # set "nonIBD" a reference level 
                                                  "UC",
                                                  "CD"))
-levels(df_input_metadata$diagnosis)  
-
 
 # convert remaining character variables to binary factor variables  
 df_input_metadata <- df_input_metadata %>% 
@@ -240,7 +248,7 @@ df_input_metadata <- df_input_metadata %>%
          dysbiosisUC = factor(dysbiosisUC),
          dysbiosisCD = factor(dysbiosisCD)) 
 
-summary(df_input_metadata) # investigate again the resulting meta-data 
+# summary(df_input_metadata) # investigate again the resulting meta-data 
 
 ```
 
@@ -259,7 +267,7 @@ df_site <- tabyl(df_input_metadata, site, diagnosis) %>%
 ```
 
 Follow the instruction in [programming with dyplyr](<https://dplyr.tidyverse.org/articles/programming.html>)
-```{r build a function}
+```{r build a function, echo=FALSE} 
 
 #write a function to generate a summary table for covariates 
 count_pct <- function(x){
@@ -281,9 +289,6 @@ count_pct <- function(x){
   data2 %>%
     filter(row_number() != n())
 } 
-
-count_pct("site")  #the function works properly  
-
 
 ```
 
@@ -349,7 +354,7 @@ numerical_summary("age") #the resulting function works properly
 ```
 
 Apply the function `numerical_summary` to all the numerical variables in meta-data with `lapply`.  
-```{r}
+```{r, collapse=TRUE, results='hide'} 
 # extract column names for all the numerical variables in meta-data 
 num_names <- df_input_metadata %>% 
   select(where(is.numeric)) %>% 
@@ -357,7 +362,7 @@ num_names <- df_input_metadata %>%
 
 list_num_summary <- lapply(num_names, numerical_summary) 
   
-str(list_num_summary)
+# str(list_num_summary) 
 
 # convert individual element of the list to data frames and bind them into a single data frame 
 df_num_summary <- as.data.frame(do.call(rbind, list_num_summary)) 
@@ -366,9 +371,8 @@ df_num_summary <- as.data.frame(do.call(rbind, list_num_summary))
 
 Combine descriptive stats tables, `df_sum_cat` and `df_num_summary` for categorical and numerical covariables, respectively  
 ```{r}
-head(df_sum_cat, 3)
-head(df_num_summary, 3)
-
+# head(df_sum_cat, 3)
+# head(df_num_summary, 3)
 
 names(df_sum_cat)[5] <- "overall"  #rename the column name
 
@@ -395,14 +399,12 @@ chi_square <- function(x){
   
 }
 
-chi_square("site")
+# chi_square("site")
 
 df_pval_cat <- data.frame(covariable = cat_cov, 
                           pvalue = numeric(length = length(cat_cov)))   #create empty df to store p-values 
 
 df_pval_cat$pvalue <- sapply(cat_cov, chi_square) 
-
-
 
 
 #write a function to do anova to numerical variables against diagnosis 
@@ -416,12 +418,10 @@ anova_num <- function(x){
   print(pval_digit)
 }
 
-
 df_pval_num <- data.frame(covariable = num_names, 
                           pvalue = numeric(length = length(num_names)))   #create empty df to store p-values 
 
 df_pval_num$pvalue <- sapply(num_names, anova_num) 
-
 
 
 #join p-values with descriptive stats table 
@@ -443,206 +443,120 @@ df_all_cov_pval2 #view the resulting table
 
 ```
 
+# Fit the mdoel
+Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status.
 
-Conduct descriptive statistics for pathway data set, printing the resultant table
-```{r, echo=FALSE}
-# descriptive stats of pathway data set 
-transp_input_path <- data.frame(t(df_input_path)) # transpose df 
+Key arguments were set as followings,\  
+- linear regression was used for data modeling `analysis_method` = `LM` 
+- set the minimal threshold for taxa prevalence as 0.1 `min_prevalence` = `0.1`
+- set the minimal threshold for taxa relative abundance as 0.01% `min_abundance` = `0.0001`
+- fixed effect variables `fixed_effects` = `c("diagnosis", "dysbiosis")`
+- random effect variable `random_effects` = `c("subject")`  
+- set the baseline for the categorical variable `diagnosis` `reference` = `c("diagnosis","nonIBD")`
 
-transp_input_path_long <- transp_input_path %>%
-  rownames_to_column("sample") %>%
-  gather(key="pathway", value="rel_abund", -sample) # reshape to a long format 
+Note that MaAsLin2 can not yet handle interaction terms directly in model building. Alternatively, persons can add additional interactive covariables in the input data frame prior to modeling. 
 
-summary_path <- transp_input_path_long %>% 
-  group_by(pathway) %>%
-  summarise(average = mean(rel_abund, na.rm=TRUE),
-            std = sd(rel_abund, na.rm=TRUE),
-            zero_rate = mean(rel_abund == 0)*100)%>%
-  arrange(desc(average)) %>%
-  head(20)  # top 20 pathways based on average relative abundance 
-
-knitr::kable(summary_path, 
-      col.names = c("Pathway",
-                    "Average",
-                    "Standard deviation",
-                    "Zeroness percentage")) 
-```
-
-### Fit mutiple linear regression model on microbiome data
-
-The following command runs MaAsLin2 on the HMP2 data, running a multivariable regression model to test for the association between microbial species abundance versus IBD diagnosis and dysbiosis scores.
-```{r message=FALSE,results='hide',collapse=TRUE}
+```{r message=FALSE,results='hide', collapse=TRUE}
 fit_data2 <- Maaslin2(
         input_data = df_input_data,
         input_metadata = df_input_metadata,
-        min_prevalence = 0, #without additional filtering 
+        min_prevalence = 0.1, #typical prevalence threshold: 10-50% (up to 70-90% can be reasonable)
+        min_abundance = 0.0001, #typical relative abundance threshold: 0.0001 
         normalization = "NONE",  #without additional normalization  
         output = "demo_output2",
         max_significance = 0.1,
         plot_heatmap = FALSE,
         plot_scatter = FALSE,
         analysis_method = "LM",  #linear regression model 
-        fixed_effects = c("diagnosis", "dysbiosis"),  #set diagnosis and dysbiosis as fixed effect variables 
+        fixed_effects = c("diagnosis", "dysbiosis"), # fixed effect variables, diagnosis and dysbiosis 
+        random_effects = c("subject"), # random effect variable  
         reference = c("diagnosis,nonIBD")) #set the baseline for the categorical variable, diagnosis 
 
 all_results <- fit_data2$results #extract coefficients and q-value
 
 ```
 
-### Evaluate significant genus based on model parameters
-significant associations is provided in 'significant_results.tsv'
+## Significant taxa checkup
+significant associations is provided in `significant_results.tsv`
+
 ```{r}
 sig_results <- all_results %>% 
-        filter(qval <= 0.05) %>% #sig threshold 
+        filter(qval <= 0.05) %>% #sig threshold q value = 0.05 
         arrange(qval)
 
-head(sig_results, 5) #view first rows 
+sig_results  # print in the paged table format 
 
 ```
 
 Draw a volcano plot to illustrate q-values and coefficients 
-```{r volcano plot qval and coeff, warning=FALSE, include=TRUE}
-require(ggrepel) 
-
-# the basic plot plot: x is "coef", y is "-log10qval" 
-ggplot(all_results,
-       aes(x=coef, y=-log10(qval)))+
-  geom_point()
-
+```{r volcano plot qval and coeff, warning=FALSE, include=TRUE, fig.cap='Illustration of coefficients and q-values of diagnosis scores for individual species'}
 # add a column to indicate significant genus 
 all_results_sig <- all_results %>% 
-  mutate(whether_sig = case_when(coef >= 0.3 & qval <= 0.05 ~ "Increase",
-                                 coef <= -0.3 & qval <= 0.05 ~ "Decrease",
-                                 abs(coef) < 0.3 | qval >0.05 ~ "No change")) 
+  mutate(whether_sig = case_when(coef >= 0.3 & qval <= 0.05 ~ "Positive",
+                                 coef <= -0.3 & qval <= 0.05 ~ "Negative",
+                                 abs(coef) < 0.3 | qval >0.05 ~ "No association")) 
 
-# add label 
+
+# add label column 
 all_results_sig$relabel <- NA
 
-all_results_sig$relabel[all_results_sig$whether_sig != "No change"] <- all_results_sig$feature[all_results_sig$whether_sig != "No change"]
+all_results_sig$relabel[all_results_sig$whether_sig != "No association"] <- all_results_sig$feature[all_results_sig$whether_sig != "No association"]
 
 # set personal color palate 
 mycolors <- c("blue", "red", "black")
-names(mycolors) <- c("Decrease", "Increase", "No change") 
+names(mycolors) <- c("Negative", "Positive", "No association") 
 
-ggplot(all_results_sig, 
-       aes(x=coef, y=-log10(qval),
+# volcano plot 
+all_results_sig %>% 
+  filter(value == "dysbiosis") %>% #focus on dysbiosis 
+ggplot(aes(x=coef, y=-log10(qval),
            color=whether_sig,
            label=relabel))+
   geom_point()+
   geom_vline(xintercept = c(-0.3, 0.3), color="red")+
   geom_hline(yintercept = -log10(0.05), color="red")+
   scale_color_manual(values = mycolors)+
-  geom_text_repel()
-
-
-```
-
-
-
-
-
-
-
-
-
-
-
-### Fit multivariable regression models on functional data
-
-Authors tend to work with CPM units because we find them to be more convenient, but they are numerically equivalent to relative abundances for modeling purposes (CPM = RA \* 1e6)
-
-Quick tips for using MaAsLin2 on functional profiles: 1.To reduce the number of features, you typically want to run either the unstratified functional features ( or a filtered subset of the stratified features) 2.You may also want to remove functional features that are highly correlated to one specific taxon (i.e. likely contributed by that microbe), since these can be better-explained by taxonomic changes
-```{r normalization, message=FALSE}
-
-#This can also be done with with the HUMAnN 3 untiliy `humann_split_stratified_table`
-unstrat_pathways <-function(dat_path){
-  temp = dat_path[!grepl("\\|",rownames(dat_path)),]
-  return(temp)
-}
-
-df_input_path = unstrat_pathways(df_input_path)
+  theme_minimal()+ 
+  geom_text_repel() #label taxa names 
 
 ```
 
-Run the same model as above on the MetaCyc pathway table generated from the bioBakery workflows.
+## Model interpretation
+Use `Faecalibacterium.prausnitzii` as an example for model interpretation. 
+```{r}
+coef_Fae <- all_results_sig %>% 
+  filter(value == "dysbiosis") %>%
+  filter(feature == "Faecalibacterium.prausnitzii") %>%
+  select(coef) %>% 
+  pull() %>%
+  round(., 3) 
 
-```{r message=FALSE,results='hide',collapse=TRUE}
-# fit the model on pathway (functional) data - it takes a few minutes  
-fit_func <- Maaslin2(
-        input_data = df_input_path,
-        input_metadata = df_input_metadata,
-        output = "demo_functional",
-        fixed_effects = c("diagnosis", "dysbiosis"),
-        reference=c("diagnosis,nonIBD"),
-        min_abundance = 0.0001,
-        min_prevalence = 0.1) 
-
-# note: here we have the samples in the columns and the features in the rows and MaAsLin2 correctly identified this and was able to match the samples. 
-
-all_results_func <- fit_func$results
-
+qval_Fae <- all_results_sig %>% 
+  filter(value == "dysbiosis") %>%
+  filter(feature == "Faecalibacterium.prausnitzii") %>%
+  select(qval) %>% 
+  pull() %>%
+  format(., scientific=TRUE) 
 ```
 
-### Interactions
+*F. prausnitzii* is negatively associated with `dysbiosis` (q value = `r qval_Fae`). In particularly, *F. prausnitzii* percentage in feces may decrease by `r abs(coef_Fae)` on average when `dysbiosis` scores increases by 1 unit independent of `diagnosis` status. 
 
-Unfortunately, MaAsLin2 does not yet provide a direct interface for testing for interaction. Instead, the user needs to create artificial interaction columns as additional 'fixed_effects' terms.
 
-Using the above fit as an example, to test for the interaction between 'diagnosis' and 'dysbiosis', I can create two additional columns: 'CD_dysbiosis' and 'UC_dysbiosis' (since the reference for 'diagnosis' is 'nonIBD'):
-```{r interaction term, message=FALSE,results='hide',collapse=TRUE}
 
-df_input_metadata$CD_dysbiosis <- (df_input_metadata$diagnosis == "CD") * df_input_metadata$dysbiosis
 
-df_input_metadata$UC_dysbiosis <- (df_input_metadata$diagnosis == "UC") * df_input_metadata$dysbiosis
 
-fit_data_interaction <- Maaslin2(
-        input_data = df_input_data,
-        input_metadata = df_input_metadata,
-        min_prevalence = 0,
-        normalization = "NONE",
-        output = "demo_output_interaction",
-        fixed_effects = c("diagnosis", "dysbiosis", "CD_dysbiosis", "UC_dysbiosis"),
-        reference = c("diagnosis,nonIBD")) 
 
-all_results_interaction <- fit_data_interaction$results  # store results 
 
-```
 
-### Random effects
 
-We note that HMP2 is a longitudinal design where the same subject (column 'subject') can have multiple samples. We thus ask MaAsLin2 to use subject as its random effect grouping variable:
-```{r mixed effect model, message=FALSE,results='hide',collapse=TRUE}
 
-fit_data_random <- Maaslin2(
-        input_data = df_input_data,
-        input_metadata = df_input_metadata,
-        min_prevalence = 0,
-        normalization = "NONE",
-        output = "demo_output_random",
-        fixed_effects = c("diagnosis", "dysbiosis"),
-        random_effects = c("subject"),
-        reference = c("diagnosis,nonIBD")
-)
 
-all_results_random <- fit_data_random$results
 
-```
 
-If you are interested in testing the effect of time in a longitudinal study, then the itme point variable should be included in 'fixed_effects' during your MaAsLin2 call.
 
-### Prevalence and abundance filtering in MaAsLin2
 
-minimum prevalence threshold: 10-50% (up to 70-90% can be reasonable) minimum relative abundance threshold: 0.0001
-```{r prevalence and abundance filtering, message=FALSE,results='hide',collapse=TRUE}
 
-fit_data_filter = Maaslin2(
-    input_data = df_input_data, 
-    input_metadata = df_input_metadata, 
-    normalization = "NONE",
-    output = "demo_output_filter", 
-    fixed_effects = c("diagnosis", "dysbiosis"),
-    reference = c("diagnosis,nonIBD"),
-    random_effects = c("subject"),
-    min_prevalence = 0.1,
-    min_abundance = 0.0001)
 
-```
+
+
+
