@@ -72,7 +72,7 @@ knitr::opts_chunk$set(fig.align = 'center',
 
 ## Install MaAsLin2 with Bioconductor
 The scripts was built with R `r getRversion()`.
-```{r load libraries, message=FALSE}
+```{r load libraries, message=FALSE, warning=FALSE}
 
 # if(!requireNamespace("BiocManager", quietly = TRUE))
 #     install.packages("BiocManager")
@@ -92,10 +92,8 @@ sessionInfo()
 
 ```
 
-## Load data sets (use example datasets provided by MaAsLin2 package)
-```{r include=FALSE}
-
-# set file pathway to abundance data 
+## Date sets 
+```{r}
 input_data <- system.file("extdata",
                           "HMP2_taxonomy.tsv",
                           package="Maaslin2") # the abundance table file 
@@ -103,7 +101,6 @@ input_data <- system.file("extdata",
 ```
 
 ```{r metadata location}
-# set file pathway to meta data 
 input_metadata <- system.file("extdata",
                               "HMP2_metadata.tsv",
                               package = "Maaslin2")  # the metadata table file 
@@ -111,7 +108,7 @@ input_metadata <- system.file("extdata",
 ```
 
 
-```{r microbiom data, message=FALSE, results='hide', collapse=TRUE}
+```{r microbiom data, collapse=TRUE}
 
 df_input_data <- read.table(file = input_data,
                             header = TRUE,
@@ -138,7 +135,7 @@ head(df_input_metadata, 5)
 ## Exploratory data analysis
 Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations\ 
 and rate of missing values 
-```{r EDA-microbiome abundance data, echo=FALSE}
+```{r EDA-microbiome abundance data}
 # descriptive stats for top 20 abundant genus 
 df_input_data_long <- df_input_data %>%
   rownames_to_column("sample") %>%
@@ -441,15 +438,15 @@ df_all_cov_pval2 #view the resulting table
 ```
 
 ## Fit a mutiple regression model on microbiome and clinical variables
-Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status.\ 
+Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status.
 
-Key arguments were set as followings, 
+Key arguments were set as followings,\  
 - linear regression was used for data modeling `analysis_method` = `LM` 
 - set the minimal threshold for taxa prevalence as 0.1 `min_prevalence` = `0.1`
 - set the minimal threshold for taxa relative abundance as 0.01% `min_abundance` = `0.0001`
 - fixed effect variables `fixed_effects` = `c("diagnosis", "dysbiosis")`
 - random effect variable `random_effects` = `c("subject")`  
-- set the baseline for the categorical variable `diagnosis` `reference` = `c("diagnosis","nonIBD")`\ 
+- set the baseline for the categorical variable `diagnosis` `reference` = `c("diagnosis","nonIBD")`
 
 Note that MaAsLin2 can not yet handle interaction terms directly in model building. Alternatively, persons can add additional interactive covariables in the input data frame prior to modeling. 
 
