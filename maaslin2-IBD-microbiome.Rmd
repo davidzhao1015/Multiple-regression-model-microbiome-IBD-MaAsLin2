@@ -469,14 +469,15 @@ knitr::kable(summary_path,
                     "Zeroness percentage")) 
 ```
 
-### Fit mutiple linear regression model on microbiome data
 
+### Fit mutiple linear regression model on microbiome data
 The following command runs MaAsLin2 on the HMP2 data, running a multivariable regression model to test for the association between microbial species abundance versus IBD diagnosis and dysbiosis scores.
 ```{r message=FALSE,results='hide',collapse=TRUE}
 fit_data2 <- Maaslin2(
         input_data = df_input_data,
         input_metadata = df_input_metadata,
-        min_prevalence = 0, #without additional filtering 
+        min_prevalence = 0.1, #typical prevalence threshold: 10-50% (up to 70-90% can be reasonable)
+        min_abundance = 0.0001, #typical relative abundance threshold: 0.0001 
         normalization = "NONE",  #without additional normalization  
         output = "demo_output2",
         max_significance = 0.1,
@@ -537,66 +538,3 @@ ggplot(all_results_sig,
 
 ```
 
-### Interactions
-
-Unfortunately, MaAsLin2 does not yet provide a direct interface for testing for interaction. Instead, the user needs to create artificial interaction columns as additional 'fixed_effects' terms.
-
-Using the above fit as an example, to test for the interaction between 'diagnosis' and 'dysbiosis', I can create two additional columns: 'CD_dysbiosis' and 'UC_dysbiosis' (since the reference for 'diagnosis' is 'nonIBD'):
-```{r interaction term, message=FALSE,results='hide',collapse=TRUE}
-
-df_input_metadata$CD_dysbiosis <- (df_input_metadata$diagnosis == "CD") * df_input_metadata$dysbiosis
-
-df_input_metadata$UC_dysbiosis <- (df_input_metadata$diagnosis == "UC") * df_input_metadata$dysbiosis
-
-fit_data_interaction <- Maaslin2(
-        input_data = df_input_data,
-        input_metadata = df_input_metadata,
-        min_prevalence = 0,
-        normalization = "NONE",
-        output = "demo_output_interaction",
-        fixed_effects = c("diagnosis", "dysbiosis", "CD_dysbiosis", "UC_dysbiosis"),
-        reference = c("diagnosis,nonIBD")) 
-
-all_results_interaction <- fit_data_interaction$results  # store results 
-
-```
-
-### Random effects
-
-We note that HMP2 is a longitudinal design where the same subject (column 'subject') can have multiple samples. We thus ask MaAsLin2 to use subject as its random effect grouping variable:
-```{r mixed effect model, message=FALSE,results='hide',collapse=TRUE}
-
-fit_data_random <- Maaslin2(
-        input_data = df_input_data,
-        input_metadata = df_input_metadata,
-        min_prevalence = 0,
-        normalization = "NONE",
-        output = "demo_output_random",
-        fixed_effects = c("diagnosis", "dysbiosis"),
-        random_effects = c("subject"),
-        reference = c("diagnosis,nonIBD")
-)
-
-all_results_random <- fit_data_random$results
-
-```
-
-If you are interested in testing the effect of time in a longitudinal study, then the itme point variable should be included in 'fixed_effects' during your MaAsLin2 call.
-
-### Prevalence and abundance filtering in MaAsLin2
-
-minimum prevalence threshold: 10-50% (up to 70-90% can be reasonable) minimum relative abundance threshold: 0.0001
-```{r prevalence and abundance filtering, message=FALSE,results='hide',collapse=TRUE}
-
-fit_data_filter = Maaslin2(
-    input_data = df_input_data, 
-    input_metadata = df_input_metadata, 
-    normalization = "NONE",
-    output = "demo_output_filter", 
-    fixed_effects = c("diagnosis", "dysbiosis"),
-    reference = c("diagnosis,nonIBD"),
-    random_effects = c("subject"),
-    min_prevalence = 0.1,
-    min_abundance = 0.0001)
-
-```
