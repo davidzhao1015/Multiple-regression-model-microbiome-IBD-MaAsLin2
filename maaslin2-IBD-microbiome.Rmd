@@ -8,20 +8,19 @@ knit: (function(inputFile, encoding) {
                         encoding=encoding, 
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
-  html_document:
-    df_print: paged
-    theme: united
-    highlight: tango
+ html_document:
+  theme: solar
+  highlight: tango
     # css: styles.css 
-    toc: true
-    toc_float: true
+  toc: TRUE
+  toc_float: FALSE
      # collapsed: false
      # smooth_scroll: false 
-  toc_depth: 2
-  number_sections: true
+  # toc_depth: 2
+  number_sections: TRUE
   fig_width: 7
   fig_height: 6
-  fig_caption: true
+  fig_caption: TRUE
   df_print: paged
 ---
 
@@ -72,14 +71,14 @@ knitr::opts_chunk$set(fig.align = 'center',
 ```
 
 ## Install MaAsLin2 with Bioconductor
-The scripts was built with `r getRversion()`. 
-```{r message=FALSE}
+The scripts was built with R `r getRversion()`.
+```{r load libraries, message=FALSE}
 
 # if(!requireNamespace("BiocManager", quietly = TRUE))
 #     install.packages("BiocManager")
 # BiocManager::install("Maaslin2")
 
-library(Maaslin2)
+library(Maaslin2) #version 
 library(tidyverse)
 library(knitr)
 library(janitor)
@@ -88,13 +87,11 @@ library(rlang)
 library(rmarkdown) #create paged tables 
 library(ggrepel) #organize labels nicely 
 library(ggplot2)
-
 ```
+The information regarding the system, R, R studio and loaded libraries was here `r sessionInfo()`
 
-## Multiple regression of microbiome and clincial covariates of interest
 
-### Load data sets (use example datasets provided by MaAsLin2 package)
-
+## Load data sets (use example datasets provided by MaAsLin2 package)
 ```{r include=FALSE}
 
 # set file pathway to abundance data 
@@ -102,42 +99,44 @@ input_data <- system.file("extdata",
                           "HMP2_taxonomy.tsv",
                           package="Maaslin2") # the abundance table file 
 
+```
+
+```{r metadata location}
 # set file pathway to meta data 
 input_metadata <- system.file("extdata",
                               "HMP2_metadata.tsv",
                               package = "Maaslin2")  # the metadata table file 
 
-# # get the pathway (functional) data 
-# download.file("https://raw.githubusercontent.com/biobakery/biobakery_workflows/master/examples/tutorial/stats_vis/input/pathabundance_relab.tsv", "./pathabundance_relab.tsv")
-
 ```
 
-```{r message=FALSE, results='hide', collapse=TRUE}
- 
-# relative abundance data 
+
+```{r microbiom data, message=FALSE, results='hide', collapse=TRUE}
+
 df_input_data <- read.table(file = input_data,
                             header = TRUE,
                             sep = "\t",
                             row.names = 1,
                             stringsAsFactors = FALSE) 
 
-# meta data 
+head(df_input_data, 5)
+```
+
+
+```{r metadata}
+
 df_input_metadata <- read.table(file=input_metadata,
                                 header = T,
                                 sep="\t",
                                 row.names = 1,
                                 stringsAsFactors = F) 
 
-# pathway data 
-df_input_path <- data.frame(read.csv("./pathabundance_relab.tsv", 
-                                     sep = "\t", 
-                                     stringsAsFactors = F, 
-                                     row.names = 1))
-
+head(df_input_metadata, 5)
 ```
 
-### Exploratory data analysis
-Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations and rate of missing values 
+
+## Exploratory data analysis
+Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations\ 
+and rate of missing values 
 ```{r EDA-microbiome abundance data, echo=FALSE}
 # descriptive stats for top 20 abundant genus 
 df_input_data_long <- df_input_data %>%
@@ -154,18 +153,20 @@ summary_genus <- df_input_data_long %>%
 
 
 # display summary of relative abundance at genus level in a table 
-knitr::kable(summary_genus, 
-      col.names = c("Genus",
+kable(summary_genus, 
+      col.names = c("Species",
                     "Average percentage",
                     "Standard deviation",
-                    "Zeroness percentage")) 
+                    "Zeroness percentage"),
+      caption = 'Descriptive statistics of top 20 abundant species',
+      format = 'html',
+      digits = 2) 
 
 ```
 
 
 ```{r}
 # structure of metadata 
-str(df_input_metadata)
 
 df_input_metadata # print paged table 
 
@@ -229,8 +230,6 @@ df_input_metadata$diagnosis <- factor(df_input_metadata$diagnosis,
                                       levels = c("nonIBD", # set "nonIBD" a reference level 
                                                  "UC",
                                                  "CD"))
-levels(df_input_metadata$diagnosis)  
-
 
 # convert remaining character variables to binary factor variables  
 df_input_metadata <- df_input_metadata %>% 
@@ -241,7 +240,7 @@ df_input_metadata <- df_input_metadata %>%
          dysbiosisUC = factor(dysbiosisUC),
          dysbiosisCD = factor(dysbiosisCD)) 
 
-summary(df_input_metadata) # investigate again the resulting meta-data 
+# summary(df_input_metadata) # investigate again the resulting meta-data 
 
 ```
 
@@ -260,7 +259,7 @@ df_site <- tabyl(df_input_metadata, site, diagnosis) %>%
 ```
 
 Follow the instruction in [programming with dyplyr](<https://dplyr.tidyverse.org/articles/programming.html>)
-```{r build a function}
+```{r build a function, include=TRUE} 
 
 #write a function to generate a summary table for covariates 
 count_pct <- function(x){
@@ -350,7 +349,7 @@ numerical_summary("age") #the resulting function works properly
 ```
 
 Apply the function `numerical_summary` to all the numerical variables in meta-data with `lapply`.  
-```{r}
+```{r, collapse=FALSE} 
 # extract column names for all the numerical variables in meta-data 
 num_names <- df_input_metadata %>% 
   select(where(is.numeric)) %>% 
@@ -440,36 +439,8 @@ df_all_cov_pval2 #view the resulting table
 
 ```
 
-
-Conduct descriptive statistics for pathway data set, printing the resultant table
-
-```{r, echo=FALSE}
-# descriptive stats of pathway data set 
-transp_input_path <- data.frame(t(df_input_path)) # transpose df 
-
-transp_input_path_long <- transp_input_path %>%
-  rownames_to_column("sample") %>%
-  gather(key="pathway", value="rel_abund", -sample) # reshape to a long format 
-
-summary_path <- transp_input_path_long %>% 
-  group_by(pathway) %>%
-  summarise(average = mean(rel_abund, na.rm=TRUE),
-            std = sd(rel_abund, na.rm=TRUE),
-            zero_rate = mean(rel_abund == 0)*100)%>%
-  arrange(desc(average)) %>%
-  head(20)  # top 20 pathways based on average relative abundance 
-
-knitr::kable(summary_path, 
-      col.names = c("Pathway",
-                    "Average",
-                    "Standard deviation",
-                    "Zeroness percentage")) 
-```
-
-
-
-### Fit a mutiple regression model on microbiome and clinical variables
-Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status. 
+## Fit a mutiple regression model on microbiome and clinical variables
+Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status.\ 
 
 Key arguments were set as followings, 
 - linear regression was used for data modeling `analysis_method` = `LM` 
@@ -477,11 +448,11 @@ Key arguments were set as followings,
 - set the minimal threshold for taxa relative abundance as 0.01% `min_abundance` = `0.0001`
 - fixed effect variables `fixed_effects` = `c("diagnosis", "dysbiosis")`
 - random effect variable `random_effects` = `c("subject")`  
-- set the baseline for the categorical variable `diagnosis` `reference` = `c("diagnosis","nonIBD")`
+- set the baseline for the categorical variable `diagnosis` `reference` = `c("diagnosis","nonIBD")`\ 
 
 Note that MaAsLin2 can not yet handle interaction terms directly in model building. Alternatively, persons can add additional interactive covariables in the input data frame prior to modeling. 
 
-```{r message=FALSE,results='hide',collapse=TRUE}
+```{r message=FALSE,results='hide', collapse=TRUE}
 fit_data2 <- Maaslin2(
         input_data = df_input_data,
         input_metadata = df_input_metadata,
@@ -549,7 +520,7 @@ ggplot(aes(x=coef, y=-log10(qval),
 
 ```
 
-###Interpretation of model coefficients 
+## Interpretation of model coefficients 
 Use `Faecalibacterium.prausnitzii` as an example for model interpretation. 
 ```{r}
 coef_Fae <- all_results_sig %>% 
