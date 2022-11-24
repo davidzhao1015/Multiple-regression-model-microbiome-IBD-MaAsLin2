@@ -20,42 +20,6 @@ output:
 
 ---
 
-```{=html}
-<style>
-#TOC{
- color: #7E7C73;
- font-family: Calibri;
- font-size: 16px;
- border-color: #BBC4C2;
-}
-h1.title{
- color: #140005;
- background-color: #F5F5F5;
- opacity: 0.6;
- font-family: Calibri;
- font-size: 30px;
-}
-h4.author{
- color: #464033;
- font-family: Calibri;
- font-size: 25px;
-}
-h4.date{
- color: #464033;
- font-family:Calibri; 
-}
-body{
- color: #464033; 
- font-family: Calibri; 
- background-color: #F5F5F5;
-}
-pre{
- color: #464033;
- background-color: #FFFFFF;
-}
-</style>
-```
-
 ```{r setup, include = FALSE}
 # set options for the entire document 
 knitr::opts_chunk$set(fig.align = 'center', 
