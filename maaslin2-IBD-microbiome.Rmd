@@ -10,7 +10,7 @@ knit: (function(inputFile, encoding) {
 output:
   html_document:
     theme: cosmo
-    highlight: breezedark
+    highlight: textmate
     df_print: paged
     toc: TRUE
     toc_float: TRUE
