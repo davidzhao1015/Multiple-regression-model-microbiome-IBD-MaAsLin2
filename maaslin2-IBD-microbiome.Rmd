@@ -9,7 +9,8 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
  html_document:
-   theme: journal
+   df_print: paged
+   theme: cerulean
    highlight: tango
   # toc: TRUE
   # toc_float: TRUE
@@ -20,7 +21,6 @@ output:
   # fig_width: 7
   # fig_height: 6
   # fig_caption: TRUE
-  # df_print: paged
 ---
 
 ```{=html}
