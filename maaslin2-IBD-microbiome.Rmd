@@ -9,14 +9,15 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
  html_document:
-   theme: paper
-  # highlight: tango
+   theme: simplex
+   #  bootswatch: solar
+   highlight: tango
     # css: styles.css 
   toc: TRUE
   toc_float: TRUE
-     # collapsed: false
-     # smooth_scroll: false 
-  # toc_depth: 2
+     collapsed: FALSE
+     smooth_scroll: FALSE 
+  toc_depth: 2
   number_sections: TRUE
   fig_width: 7
   fig_height: 6
