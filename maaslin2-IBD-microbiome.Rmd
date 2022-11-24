@@ -12,15 +12,9 @@ output:
   theme: 
    bootswatch: solar
   # highlight: tango
-=======
-  html_document:
-    df_print: paged
-    theme: paper
-    highlight: pygments
->>>>>>> c7fcf0dfdf21ba1a81808068ae19b32e0160dc77
     # css: styles.css 
   toc: TRUE
-  toc_float: FALSE
+  toc_float: TRUE
      # collapsed: false
      # smooth_scroll: false 
   # toc_depth: 2
