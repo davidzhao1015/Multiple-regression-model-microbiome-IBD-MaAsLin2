@@ -9,15 +9,14 @@ knit: (function(inputFile, encoding) {
                         output_file=file.path(dirname(inputFile), out_dir, 'index.html'))}) 
 output:
   html_document:
-    theme: cerulean
+    theme: cosmo
     df_print: paged
     toc: TRUE
     toc_float: TRUE
     number_sections: TRUE
-    # fig_width: 7
-    # fig_height: 6
-    # fig_caption: TRUE
-
+    fig_width: 7
+    fig_height: 6
+    fig_caption: TRUE
 
 ---
 
@@ -533,8 +532,9 @@ qval_Fae <- all_results_sig %>%
 
 *F. prausnitzii* is negatively associated with `dysbiosis` (q value = `r qval_Fae`). In particularly, *F. prausnitzii* percentage in feces may decrease by `r abs(coef_Fae)` on average when `dysbiosis` scores increases by 1 unit independent of `diagnosis` status. 
 
-## Session information
+
 ```{r package version info}
+# Sessoin information 
 sessionInfo()  
 ```
 
