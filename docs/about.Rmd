@@ -4,10 +4,9 @@ author: "David Xin Zhao"
 date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
 ---
 
-```{css, include=FALSE}
-h1, h2 {color: "#0074B7";} 
-
-body {color: black;}
+```{css, echo=FALSE}
+h1, h2 {color: #0074B7;} 
+body {color: black; font-family: Arial;} 
 ```
 
 ```{r setup, include = FALSE}
