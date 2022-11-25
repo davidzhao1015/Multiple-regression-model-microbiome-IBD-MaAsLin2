@@ -1,0 +1,490 @@
+---
+title: "Multivariate model"
+---
+
+```{r setup, include = FALSE}
+# set options for the entire document 
+knitr::opts_chunk$set(fig.align = 'center', 
+                      fig.dim =c(6,4), 
+                      dev="png",
+                      echo=TRUE, #display code in output document 
+                      error=FALSE,
+                      message=FALSE) #stop render when error occurs   
+```
+
+
+This project was built with R `r getRversion()`.
+```{r load libraries, message=FALSE, warning=FALSE}
+
+# libraries loaded 
+# if(!requireNamespace("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager")
+# BiocManager::install("Maaslin2")
+
+library(Maaslin2) # implement multivariate regression 
+library(tidyverse)
+library(knitr)
+library(janitor) # create descripitive stats table 
+library(rmarkdown) # create paged tables 
+library(ggrepel) # organize labels nicely 
+library(ggplot2)
+library(bslib) # bootswatch themes 
+
+# use the function below to list available html output themes 
+# bslib::bootswatch_themes()
+# ?bs_theme to see more variables adjustable in html themes 
+
+```
+
+# Data preprocessing
+## Raw datasets 
+
+Set the folder location for the microbiome abundance data set 
+```{r}
+input_data <- system.file("extdata",
+                          "HMP2_taxonomy.tsv",
+                          package="Maaslin2") # the abundance table file 
+
+```
+
+Set the folder location for the meta data set 
+```{r metadata location}
+input_metadata <- system.file("extdata",
+                              "HMP2_metadata.tsv",
+                              package = "Maaslin2")  # the metadata table file 
+
+```
+
+Read in the microbiome abundance data 
+```{r microbiom data, collapse=TRUE}
+
+df_input_data <- read.table(file = input_data,
+                            header = TRUE,
+                            sep = "\t",
+                            row.names = 1,
+                            stringsAsFactors = FALSE) 
+
+head(df_input_data, 5) # view first rows 
+```
+
+Read in the metadata 
+```{r metadata}
+
+df_input_metadata <- read.table(file=input_metadata,
+                                header = T,
+                                sep="\t",
+                                row.names = 1,
+                                stringsAsFactors = F) 
+
+head(df_input_metadata, 5) # view first rows 
+```
+
+
+## Exploratory data analysis
+Generate descriptive statistics for microbiome relative abundance data, calculating mean, standard deviations and rate of missing values 
+```{r EDA-microbiome abundance data}
+# descriptive stats for top 20 abundant genus 
+df_input_data_long <- df_input_data %>%
+  rownames_to_column("sample") %>%
+  gather(key="genus", value="rel_abund", -sample) #reshape short to long data frame 
+
+summary_genus <- df_input_data_long %>% 
+  group_by(genus) %>%
+  summarise(average = mean(rel_abund, na.rm=TRUE)*100,
+            std = sd(rel_abund, na.rm=TRUE)*100,
+            zero_rate = mean(rel_abund == 0)*100)%>%
+  arrange(desc(average)) %>%
+  head(20)  # top 20 genus based on average relative abundance 
+
+
+# display summary of relative abundance at genus level in a table 
+kable(summary_genus, 
+      col.names = c("Species",
+                    "Average percentage",
+                    "Standard deviation",
+                    "Zeroness percentage"),
+      caption = 'Descriptive statistics of top 20 abundant species',
+      format = 'html',
+      digits = 2) 
+
+```
+
+
+```{r}
+# inspect metadata 
+
+df_input_metadata # print paged table 
+
+```
+
+
+Visualize relationship between representative genus and dysbiosis (continuous variable), stratified by diagnosis status
+```{r scatter plot-microbiome vs dysbiosis}
+
+#extract top 10 genus with highest average of relative abundance 
+top10_g <- summary_genus %>% 
+  arrange(desc(average)) %>% 
+  head(10) %>% 
+  pull(genus)
+
+#select top 10 representative genus 
+df_input_data_top <- df_input_data %>% 
+  select(all_of(top10_g)) %>% 
+  rownames_to_column("subject_id")
+
+#subset dysbiosis and diagnosis variables 
+df_input_metadata_sub <- df_input_metadata %>% 
+  select(diagnosis, dysbiosis) %>% 
+  rownames_to_column("subject_id") 
+
+#merge microbiome data and metadata 
+merge_micro_meta_top <- df_input_data_top %>% 
+  inner_join(df_input_metadata_sub, by="subject_id")
+
+```
+
+
+```{r plot, message=FALSE, fig.cap='Relationship between representative top genus and diagnosis'}
+# scatter plot given genus vs dysbiosis with faceting by diagnosis status (for instance, F. prausnitzii)
+require(RColorBrewer)
+
+ggplot(merge_micro_meta_top, aes(x= dysbiosis, 
+                                 y=Faecalibacterium.prausnitzii,
+                                 color=diagnosis))+
+  geom_point(alpha=0.7)+
+  geom_smooth(method = "lm",
+              se=FALSE)+
+  scale_color_brewer(palette = "Dark2")+
+  theme_minimal()
+  
+
+```
+
+
+
+There were 11 covariates in mete-data as follows, 
+`age`, `dysbiosis`, and `collection` were numerical variables; and `site`, `diagnosis`, `subject`, `antibiotics`, `dysbiosis_binary`, `dysbiosisnonIBD`, `dysbiosisUC`, `dysbiosisCD` were character variables. 
+
+In addition,  missing values were present in three variables, `dysbiosisnonIBD`, `dysbiosisUC`, `dysbosisCD`. 
+
+```{r convert to factor variables}
+
+# convert some character variables to factor variables 
+# diagnosis 
+df_input_metadata$diagnosis <- factor(df_input_metadata$diagnosis, 
+                                      levels = c("nonIBD", # set "nonIBD" a reference level 
+                                                 "UC",
+                                                 "CD"))
+
+# convert remaining character variables to binary factor variables  
+df_input_metadata <- df_input_metadata %>% 
+  mutate(site = factor(site),
+         antibiotics = factor(antibiotics),  
+         dysbiosis_binary = factor(dysbiosis_binary),
+         dysbiosisnonIBD = factor(dysbiosisnonIBD),
+         dysbiosisUC = factor(dysbiosisUC),
+         dysbiosisCD = factor(dysbiosisCD)) 
+
+# summary(df_input_metadata) # investigate again the resulting meta-data 
+
+```
+
+Calculate median and IQR for numerical variables; and subtotal (percentages) for categorical variables. Conduct chi-square test on categorical variables and do ANOVA on numerical variables within each strata according to diagnosis.Use a table to display summary. 
+```{r summary table for meta-data}
+
+# site distribution by diagnosis levels 
+df_site <- tabyl(df_input_metadata, site, diagnosis) %>% 
+  adorn_totals(c("row", "col"))%>%
+  adorn_percentages("row") %>% 
+  adorn_pct_formatting(digits = 0) %>% 
+  adorn_ns() %>%  # combine count and percentage 
+  add_row(site = "site", 
+          .before = 1) %>%  #add one row showing variable name 
+  filter(row_number() !=7) #remove total row 
+```
+
+Follow the instruction in [programming with dyplyr](<https://dplyr.tidyverse.org/articles/programming.html>)
+```{r build a function, echo=FALSE} 
+
+#write a function to generate a summary table for covariates 
+count_pct <- function(x){
+  data1 <- df_input_metadata %>% 
+    tabyl(., .data[[x]], diagnosis) %>% #follow the website, "programming with dplyr"  
+    adorn_totals(c("row", "col"))%>%
+    adorn_percentages("row") %>% 
+    adorn_pct_formatting(digits = 0) %>% 
+    adorn_ns()
+  
+  addrow <- data.frame(colnames(data1)[1], NA, NA, NA, NA)
+  
+  names(addrow) <- colnames(data1)
+  
+  data2 <- rbind(addrow, data1) 
+  
+  names(data2)[1] <- "covariable" 
+  
+  data2 %>%
+    filter(row_number() != n())
+} 
+
+```
+
+Apply the function to multiple categorical variables. Subset only categorical variables from `df_input_metadata`. 
+```{r}
+cat_cov <- df_input_metadata %>% 
+  select(where(is.factor)) %>% 
+  select(-diagnosis) %>% 
+  colnames()
+
+sum_cat <- lapply(cat_cov, count_pct) #list of summary of multiple categorical variables  
+
+# combine each element of the list by rows before storing in a data frame 
+df_sum_cat <- as.data.frame(do.call(rbind, sum_cat))
+
+```
+
+
+```{r, results='hide'}
+
+str(df_input_metadata)
+
+numerical_summary <- function(x){
+dat_ns <- df_input_metadata %>% 
+  group_by(diagnosis) %>% 
+  summarise(average = round(mean(.data[[x]], na.rm=T),2),
+            std = round(sd(.data[[x]], na.rm = T),2)) %>% 
+  select(-average)
+  
+df_num_sub <- df_input_metadata %>% 
+  group_by(diagnosis) %>% 
+  summarise(average = round(mean(.data[[x]], na.rm=T),2)) %>%
+  adorn_ns(ns = dat_ns)%>% 
+  rename("average (sd)"= average) %>%
+  spread(key=diagnosis, value = "average (sd)") %>% 
+  mutate(covariable = x) %>% 
+  select(covariable, 1:3)
+
+
+total_dat_ns <- df_input_metadata %>%
+  summarise(average = round(mean(.data[[x]], na.rm=T),2),
+            std = round(sd(.data[[x]], na.rm = T),2)) %>%
+  select(-average) %>%
+  mutate(covariable = x) %>% 
+  select(covariable, std)
+  
+df_num <- df_input_metadata %>%
+  summarise(average = round(mean(.data[[x]], na.rm=T),2)) %>%
+  mutate(covariable = x) %>% 
+  select(covariable, average) %>% 
+  adorn_ns(ns = total_dat_ns) %>% 
+  rename("average (sd)" = average)
+
+df_num_bind <- cbind(df_num_sub, df_num[,2]) 
+
+colnames(df_num_bind)[5] <- "overall"
+
+print(df_num_bind) 
+}
+
+numerical_summary("age") #the resulting function works properly
+
+```
+
+Apply the function `numerical_summary` to all the numerical variables in meta-data with `lapply`.  
+```{r, collapse=TRUE, results='hide'} 
+# extract column names for all the numerical variables in meta-data 
+num_names <- df_input_metadata %>% 
+  select(where(is.numeric)) %>% 
+  colnames()
+
+list_num_summary <- lapply(num_names, numerical_summary) 
+  
+# str(list_num_summary) 
+
+# convert individual element of the list to data frames and bind them into a single data frame 
+df_num_summary <- as.data.frame(do.call(rbind, list_num_summary)) 
+
+```
+
+Combine descriptive stats tables, `df_sum_cat` and `df_num_summary` for categorical and numerical covariables, respectively  
+```{r}
+# head(df_sum_cat, 3)
+# head(df_num_summary, 3)
+
+names(df_sum_cat)[5] <- "overall"  #rename the column name
+
+df_all_cov <- bind_rows(df_sum_cat, df_num_summary) #bind by rows 
+
+#replace NA in the column, "co variable" with " unknown"
+df_all_cov$covariable <- as.character(df_all_cov$covariable)
+df_all_cov$covariable %>% replace_na("unknown")  
+
+```
+
+Apply chi-square test and ANOVA to categorical descriptive stats and numerical descriptive stats, respectively 
+```{r}
+
+# write a function to do chi-square to categorical variables 
+chi_square <- function(x){
+  chisq <- chisq.test(df_input_metadata[[x]], df_input_metadata$diagnosis)
+  
+  pval <- chisq$p.value
+  
+  pval_digit <- format(round(pval, 3), nsmall=4)
+  
+  print(pval_digit)
+  
+}
+
+# chi_square("site")
+
+df_pval_cat <- data.frame(covariable = cat_cov, 
+                          pvalue = numeric(length = length(cat_cov)))   #create empty df to store p-values 
+
+df_pval_cat$pvalue <- sapply(cat_cov, chi_square) 
+
+
+#write a function to do anova to numerical variables against diagnosis 
+anova_num <- function(x){
+  f <- paste0(x, "~", "diagnosis")
+  
+  pval <- anova(lm(f, data=df_input_metadata))$"Pr(>F)"[1]
+  
+  pval_digit <- format(round(pval, 3), nsmall=5)
+  
+  print(pval_digit)
+}
+
+df_pval_num <- data.frame(covariable = num_names, 
+                          pvalue = numeric(length = length(num_names)))   #create empty df to store p-values 
+
+df_pval_num$pvalue <- sapply(num_names, anova_num) 
+
+
+#join p-values with descriptive stats table 
+df_all_cov_pval <- df_all_cov %>% 
+  left_join(df_pval_num, by="covariable") %>% 
+  left_join(df_pval_cat, by="covariable")  
+
+df_all_cov_pval$pvalue.x <- if_else(!is.na(df_all_cov_pval$pvalue.x), 
+                            df_all_cov_pval$pvalue.x,
+                            df_all_cov_pval$pvalue.y)  
+
+df_all_cov_pval$covariable <- if_else(!is.na(df_all_cov_pval$covariable), 
+                            df_all_cov_pval$covariable,
+                            "unknown")  
+
+df_all_cov_pval2 <- df_all_cov_pval %>% select(-pvalue.y) %>% rename(pvalue = pvalue.x) 
+
+df_all_cov_pval2 #view the resulting table
+
+```
+
+# Fit the mdoel
+Run MaAsLin2 on the HMP2 data, building a multiple regression model to evaluate the association between microbial species (relative abundance) and `dysbiosis` scores adjusting for IBD `diagnosis` status.
+
+Key arguments were set as followings,\  
+- linear regression was used for data modeling `analysis_method` = `LM` 
+- set the minimal threshold for taxa prevalence as 0.1 `min_prevalence` = `0.1`
+- set the minimal threshold for taxa relative abundance as 0.01% `min_abundance` = `0.0001`
+- fixed effect variables `fixed_effects` = `c("diagnosis", "dysbiosis")`
+- random effect variable `random_effects` = `c("subject")`  
+- set the baseline for the categorical variable `diagnosis` `reference` = `c("diagnosis","nonIBD")`
+
+Note that MaAsLin2 can not yet handle interaction terms directly in model building. Alternatively, persons can add additional interactive covariables in the input data frame prior to modeling. 
+
+```{r message=FALSE,results='hide', collapse=TRUE}
+fit_data2 <- Maaslin2(
+        input_data = df_input_data,
+        input_metadata = df_input_metadata,
+        min_prevalence = 0.1, #typical prevalence threshold: 10-50% (up to 70-90% can be reasonable)
+        min_abundance = 0.0001, #typical relative abundance threshold: 0.0001 
+        normalization = "NONE",  #without additional normalization  
+        output = "demo_output2",
+        max_significance = 0.1,
+        plot_heatmap = FALSE,
+        plot_scatter = FALSE,
+        analysis_method = "LM",  #linear regression model 
+        fixed_effects = c("diagnosis", "dysbiosis"), # fixed effect variables, diagnosis and dysbiosis 
+        random_effects = c("subject"), # random effect variable  
+        reference = c("diagnosis,nonIBD")) #set the baseline for the categorical variable, diagnosis 
+
+all_results <- fit_data2$results #extract coefficients and q-value
+
+```
+
+## Significant taxa checkup
+significant associations is provided in `significant_results.tsv`
+
+```{r}
+sig_results <- all_results %>% 
+        filter(qval <= 0.05) %>% #sig threshold q value = 0.05 
+        arrange(qval)
+
+sig_results  # print in the paged table format 
+
+```
+
+Draw a volcano plot to illustrate q-values and coefficients 
+```{r volcano plot qval and coeff, warning=FALSE, include=TRUE, fig.cap='Illustration of coefficients and q-values of diagnosis scores for individual species'}
+# add a column to indicate significant genus 
+all_results_sig <- all_results %>% 
+  mutate(whether_sig = case_when(coef >= 0.3 & qval <= 0.05 ~ "Positive",
+                                 coef <= -0.3 & qval <= 0.05 ~ "Negative",
+                                 abs(coef) < 0.3 | qval >0.05 ~ "No association")) 
+
+
+# add label column 
+all_results_sig$relabel <- NA
+
+all_results_sig$relabel[all_results_sig$whether_sig != "No association"] <- all_results_sig$feature[all_results_sig$whether_sig != "No association"]
+
+# set personal color palate 
+mycolors <- c("blue", "red", "black")
+names(mycolors) <- c("Negative", "Positive", "No association") 
+
+# volcano plot 
+all_results_sig %>% 
+  filter(value == "dysbiosis") %>% #focus on dysbiosis 
+ggplot(aes(x=coef, y=-log10(qval),
+           color=whether_sig,
+           label=relabel))+
+  geom_point()+
+  geom_vline(xintercept = c(-0.3, 0.3), color="red")+
+  geom_hline(yintercept = -log10(0.05), color="red")+
+  scale_color_manual(values = mycolors)+
+  theme_minimal()+ 
+  geom_text_repel() #label taxa names 
+
+```
+
+## Model interpretation
+Use `Faecalibacterium.prausnitzii` as an example for model interpretation. 
+```{r}
+coef_Fae <- all_results_sig %>% 
+  filter(value == "dysbiosis") %>%
+  filter(feature == "Faecalibacterium.prausnitzii") %>%
+  select(coef) %>% 
+  pull() %>%
+  round(., 3) 
+
+qval_Fae <- all_results_sig %>% 
+  filter(value == "dysbiosis") %>%
+  filter(feature == "Faecalibacterium.prausnitzii") %>%
+  select(qval) %>% 
+  pull() %>%
+  format(., scientific=TRUE) 
+```
+
+*F. prausnitzii* is negatively associated with `dysbiosis` (q value = `r qval_Fae`). In particularly, *F. prausnitzii* percentage in feces may decrease by `r abs(coef_Fae)` on average when `dysbiosis` scores increases by 1 unit independent of `diagnosis` status. 
+
+
+```{r package version info}
+# Sessoin information 
+sessionInfo()  
+```
+
+
+
+
+
