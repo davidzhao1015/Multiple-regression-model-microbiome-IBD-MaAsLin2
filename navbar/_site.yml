@@ -10,4 +10,12 @@ navbar:
 output:
   html_document:
     theme: cosmo
-    highlight: textmate
+    highlight: pygments
+    df_print: paged
+    toc: TRUE
+    toc_float: TRUE
+    collapsed: FALSE
+    number_sections: TRUE
+    fig_width: 7
+    fig_height: 6
+    fig_caption: TRUE
