@@ -3,14 +3,10 @@ title: "Multivariate model"
 author: "David Xin Zhao"
 date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
 ---
-<style>
-body{
- color: black;
- font-family: sans-serif; 
-}
 
-</style>
-
+```{css}
+h1 {color: red;}
+```
 
 ```{r setup, include = FALSE}
 # set options for the entire document 
