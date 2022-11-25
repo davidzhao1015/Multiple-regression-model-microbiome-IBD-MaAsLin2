@@ -1,0 +1,1560 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Multivariate model</title>
+
+<script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/textmate.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">My Microbiome Data Science Website</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="index.html">Home</a>
+</li>
+<li>
+  <a href="about.html">Multivariate model</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Multivariate model</h1>
+
+</div>
+
+
+<p>This project was built with R 4.2.1.</p>
+<pre class="r"><code># libraries loaded 
+# if(!requireNamespace(&quot;BiocManager&quot;, quietly = TRUE))
+#     install.packages(&quot;BiocManager&quot;)
+# BiocManager::install(&quot;Maaslin2&quot;)
+
+library(Maaslin2) # implement multivariate regression 
+library(tidyverse)
+library(knitr)
+library(janitor) # create descripitive stats table 
+library(rmarkdown) # create paged tables 
+library(ggrepel) # organize labels nicely 
+library(ggplot2)
+library(bslib) # bootswatch themes 
+
+# use the function below to list available html output themes 
+# bslib::bootswatch_themes()
+# ?bs_theme to see more variables adjustable in html themes </code></pre>
+<div id="data-preprocessing" class="section level1">
+<h1>Data preprocessing</h1>
+<div id="raw-datasets" class="section level2">
+<h2>Raw datasets</h2>
+<p>Set the folder location for the microbiome abundance data set</p>
+<pre class="r"><code>input_data &lt;- system.file(&quot;extdata&quot;,
+                          &quot;HMP2_taxonomy.tsv&quot;,
+                          package=&quot;Maaslin2&quot;) # the abundance table file </code></pre>
+<p>Set the folder location for the meta data set</p>
+<pre class="r"><code>input_metadata &lt;- system.file(&quot;extdata&quot;,
+                              &quot;HMP2_metadata.tsv&quot;,
+                              package = &quot;Maaslin2&quot;)  # the metadata table file </code></pre>
+<p>Read in the microbiome abundance data</p>
+<pre class="r"><code>
+df_input_data &lt;- read.table(file = input_data,
+                            header = TRUE,
+                            sep = &quot;\t&quot;,
+                            row.names = 1,
+                            stringsAsFactors = FALSE) 
+
+head(df_input_data, 5) # view first rows 
+##          Bifidobacterium.adolescentis Bifidobacterium.bifidum Bifidobacterium.longum Bifidobacterium.pseudocatenulatum
+## CSM5FZ4M                    0.0000000                       0              0.0000000                                 0
+## CSM5MCUO                    0.0002803                       0              0.0002857                                 0
+## CSM5MCVL                    0.0000000                       0              0.0000000                                 0
+## CSM5MCVN                    0.0000000                       0              0.0000000                                 0
+## CSM5MCW6                    0.0000000                       0              0.0000000                                 0
+##          Collinsella.aerofaciens Bacteroides.caccae Bacteroides.cellulosilyticus Bacteroides.dorei Bacteroides.eggerthii
+## CSM5FZ4M               0.0000000          0.0000299                    0.0000000         0.1306320                     0
+## CSM5MCUO               0.0002506          0.0257430                    0.0003977         0.0057939                     0
+## CSM5MCVL               0.0006440          0.0000000                    0.0000000         0.0000304                     0
+## CSM5MCVN               0.0000079          0.0000000                    0.0000000         0.0000062                     0
+## CSM5MCW6               0.0000000          0.0000000                    0.0000000         0.7979280                     0
+##          Bacteroides.faecis Bacteroides.finegoldii Bacteroides.fragilis Bacteroides.intestinalis Bacteroides.massiliensis
+## CSM5FZ4M          0.0000000                      0            0.0000000                        0                 0.00e+00
+## CSM5MCUO          0.0025964                      0            0.0062334                        0                 0.00e+00
+## CSM5MCVL          0.0000000                      0            0.2603660                        0                 0.00e+00
+## CSM5MCVN          0.0000000                      0            0.1490410                        0                 1.25e-05
+## CSM5MCW6          0.0000000                      0            0.0000000                        0                 0.00e+00
+##          Bacteroides.ovatus Bacteroides.salyersiae Bacteroides.stercoris Bacteroides.thetaiotaomicron Bacteroides.uniformis
+## CSM5FZ4M          0.1908630              0.0090411             0.0000000                    0.0199315             0.3258120
+## CSM5MCUO          0.0344354              0.0129821             0.0836427                    0.0006236             0.0677076
+## CSM5MCVL          0.0000246              0.0000000             0.0000000                    0.1293830             0.0000000
+## CSM5MCVN          0.0000000              0.0000000             0.0000000                    0.0832982             0.0000000
+## CSM5MCW6          0.0000000              0.0000000             0.0000000                    0.0000000             0.0000000
+##          Bacteroides.vulgatus Bacteroides.xylanisolvens Bacteroidales.bacterium.ph8 Barnesiella.intestinihominis
+## CSM5FZ4M            0.0000362                 0.0111190                   0.0000000                    0.0000000
+## CSM5MCUO            0.1691570                 0.0009044                   0.0024183                    0.0195324
+## CSM5MCVL            0.3140030                 0.0232747                   0.0000000                    0.0000000
+## CSM5MCVN            0.4237980                 0.0164535                   0.0000000                    0.0000000
+## CSM5MCW6            0.0000000                 0.0000000                   0.0000000                    0.0000000
+##          Coprobacter.fastidiosus Odoribacter.splanchnicus Parabacteroides.distasonis Parabacteroides.goldsteinii
+## CSM5FZ4M               0.0000000                0.0000000                  0.0026035                           0
+## CSM5MCUO               0.0000000                0.0030421                  0.0000000                           0
+## CSM5MCVL               0.0000000                0.0000000                  0.0000000                           0
+## CSM5MCVN               0.0000000                0.0000000                  0.0000000                           0
+## CSM5MCW6               0.0033702                0.0204998                  0.0000000                           0
+##          Parabacteroides.merdae Parabacteroides.unclassified Paraprevotella.clara Paraprevotella.unclassified Prevotella.copri
+## CSM5FZ4M              0.0000000                    0.0605912            0.0000000                   0.0000000                0
+## CSM5MCUO              0.0026058                    0.0000000            0.0071178                   0.0203598                0
+## CSM5MCVL              0.0000000                    0.0001241            0.0000000                   0.0000000                0
+## CSM5MCVN              0.0000000                    0.0006701            0.0000000                   0.0000000                0
+## CSM5MCW6              0.0000000                    0.0000000            0.0000000                   0.0000000                0
+##          Alistipes.finegoldii Alistipes.onderdonkii Alistipes.putredinis Alistipes.shahii Alistipes.unclassified
+## CSM5FZ4M             6.78e-05             0.0041528            0.0587475        0.0000000              0.0000000
+## CSM5MCUO             0.00e+00             0.0034786            0.0471930        0.0021057              0.0000000
+## CSM5MCVL             0.00e+00             0.0000000            0.0000000        0.0000000              0.0000000
+## CSM5MCVN             0.00e+00             0.0000000            0.0000000        0.0000000              0.0000000
+## CSM5MCW6             0.00e+00             0.0000000            0.0000000        0.0000000              0.0387423
+##          Streptococcus.salivarius Clostridium.bolteae Clostridium.citroniae Clostridium.clostridioforme Clostridium.hathewayi
+## CSM5FZ4M                        0           0.0000369               0.0e+00                   0.0000788             0.0000000
+## CSM5MCUO                        0           0.0000696               4.3e-06                   0.0000000             0.0000194
+## CSM5MCVL                        0           0.0043222               0.0e+00                   0.0276218             0.0071817
+## CSM5MCVN                        0           0.0013670               0.0e+00                   0.0884657             0.0005971
+## CSM5MCW6                        0           0.0090233               0.0e+00                   0.0157132             0.0000000
+##          Clostridium.leptum Clostridium.nexile Clostridium.symbiosum Flavonifractor.plautii Eubacterium.eligens Eubacterium.hallii
+## CSM5FZ4M          0.0008177          0.0000000             0.0000000              0.0000000           0.0000000          0.0015772
+## CSM5MCUO          0.0000000          0.0000000             0.0000000              0.0000725           0.0745387          0.0001715
+## CSM5MCVL          0.0000000          0.0012594             0.0000000              0.0047196           0.0000000          0.0000000
+## CSM5MCVN          0.0000000          0.0018467             0.0000000              0.0012898           0.0000000          0.0002252
+## CSM5MCW6          0.0000000          0.0000000             0.0032695              0.0005009           0.0241049          0.0000000
+##          Eubacterium.rectale Eubacterium.siraeum Eubacterium.sp.3.1.31 Eubacterium.ventriosum Ruminococcus.gnavus
+## CSM5FZ4M           0.0000000           0.0028149                     0                      0           0.0007802
+## CSM5MCUO           0.0377607           0.0000000                     0                      0           0.0000000
+## CSM5MCVL           0.0145548           0.0000000                     0                      0           0.0000730
+## CSM5MCVN           0.0181870           0.0000000                     0                      0           0.0000000
+## CSM5MCW6           0.0000000           0.0000000                     0                      0           0.0002990
+##          Ruminococcus.obeum Ruminococcus.torques Coprococcus.comes Dorea.longicatena Lachnospiraceae.bacterium.1.1.57FAA
+## CSM5FZ4M          0.0016194            0.0010076         0.0013645         0.0030700                           0.0000000
+## CSM5MCUO          0.0012169            0.0021480         0.0013398         0.0081932                           0.0001191
+## CSM5MCVL          0.0000000            0.0008220         0.0000000         0.0000643                           0.0000000
+## CSM5MCVN          0.0000157            0.0000000         0.0000000         0.0053145                           0.0000000
+## CSM5MCW6          0.0005244            0.0011660         0.0000000         0.0000000                           0.0015111
+##          Lachnospiraceae.bacterium.3.1.46FAA Roseburia.hominis Roseburia.intestinalis Roseburia.inulinivorans
+## CSM5FZ4M                           0.0000000         0.0000000               0.000000               0.0000000
+## CSM5MCUO                           0.0016632         0.0000911               0.067003               0.0075671
+## CSM5MCVL                           0.0000208         0.0224600               0.000000               0.0000000
+## CSM5MCVN                           0.0010537         0.0009666               0.000000               0.0000000
+## CSM5MCW6                           0.0000000         0.0298091               0.000000               0.0011846
+##          Roseburia.unclassified Oscillibacter.unclassified Peptostreptococcaceae.noname.unclassified Faecalibacterium.prausnitzii
+## CSM5FZ4M                      0                  0.0041547                                   0.00000                    0.0936191
+## CSM5MCUO                      0                  0.0000000                                   0.00194                    0.1607060
+## CSM5MCVL                      0                  0.0000000                                   0.00000                    0.0001213
+## CSM5MCVN                      0                  0.0000000                                   0.00000                    0.0000000
+## CSM5MCW6                      0                  0.0126023                                   0.00000                    0.0000000
+##          Ruminococcus.bromii Ruminococcus.callidus Ruminococcus.lactaris Subdoligranulum.unclassified Coprobacillus.unclassified
+## CSM5FZ4M           0.0071109                     0             0.0000000                    0.0156577                  0.0000000
+## CSM5MCUO           0.0000000                     0             0.0005857                    0.0320903                  0.0000000
+## CSM5MCVL           0.0000000                     0             0.0000000                    0.0000000                  0.0005083
+## CSM5MCVN           0.0000000                     0             0.0000000                    0.0000768                  0.0000218
+## CSM5MCW6           0.0000000                     0             0.0000000                    0.0095345                  0.0000000
+##          Acidaminococcus.unclassified Dialister.invisus Veillonella.atypica Veillonella.dispar Veillonella.parvula
+## CSM5FZ4M                    0.0287905         0.0000000                   0                  0            0.00e+00
+## CSM5MCUO                    0.0000000         0.0000000                   0                  0            2.06e-05
+## CSM5MCVL                    0.0096519         0.0239000                   0                  0            0.00e+00
+## CSM5MCVN                    0.1225680         0.0224342                   0                  0            0.00e+00
+## CSM5MCW6                    0.0000000         0.0000000                   0                  0            0.00e+00
+##          Veillonella.unclassified Burkholderiales.bacterium.1.1.47 Parasutterella.excrementihominis Sutterella.wadsworthensis
+## CSM5FZ4M                 0.00e+00                         0.000000                        0.0000000                         0
+## CSM5MCUO                 4.24e-05                         0.000971                        0.0086767                         0
+## CSM5MCVL                 0.00e+00                         0.000000                        0.0000000                         0
+## CSM5MCVN                 0.00e+00                         0.000000                        0.0000000                         0
+## CSM5MCW6                 1.29e-05                         0.000370                        0.0057080                         0
+##          Bilophila.unclassified Escherichia.coli Escherichia.unclassified Klebsiella.pneumoniae Haemophilus.parainfluenzae
+## CSM5FZ4M              0.0004782        0.0010136                0.0000000             0.0000000                   0.000000
+## CSM5MCUO              0.0011601        0.0026399                0.0000000             0.0044638                   0.000241
+## CSM5MCVL              0.0000000        0.0112689                0.0000000             0.0138117                   0.000000
+## CSM5MCVN              0.0000000        0.0001853                0.0004242             0.0000000                   0.000000
+## CSM5MCW6              0.0000000        0.0000000                0.0000000             0.0000000                   0.000000
+##          Akkermansia.muciniphila C2likevirus.unclassified
+## CSM5FZ4M                       0                0.0000000
+## CSM5MCUO                       0                0.0000000
+## CSM5MCVL                       0                0.0141917
+## CSM5MCVN                       0                0.0000000
+## CSM5MCW6                       0                0.0000000</code></pre>
+<p>Read in the metadata</p>
+<pre class="r"><code>df_input_metadata &lt;- read.table(file=input_metadata,
+                                header = T,
+                                sep=&quot;\t&quot;,
+                                row.names = 1,
+                                stringsAsFactors = F) 
+
+head(df_input_metadata, 5) # view first rows </code></pre>
+<pre><code>##                    site age diagnosis subject antibiotics dysbiosis_binary dysbiosis dysbiosisnonIBD dysbiosisUC dysbiosisCD
+## CSM5FZ3N_P Cedars-Sinai  43        CD   C3001          No               No 0.7923148              No          No          No
+## CSM5FZ3R_P Cedars-Sinai  43        CD   C3001          No               No 0.8379234              No          No          No
+## CSM5FZ3T_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9242969              No          No         Yes
+## CSM5FZ3V_P Cedars-Sinai  43        CD   C3001          No               No 0.8304005              No          No          No
+## CSM5FZ3X_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9109670              No          No         Yes
+##            collection
+## CSM5FZ3N_P          1
+## CSM5FZ3R_P          2
+## CSM5FZ3T_P          1
+## CSM5FZ3V_P          4
+## CSM5FZ3X_P          2</code></pre>
+</div>
+<div id="exploratory-data-analysis" class="section level2">
+<h2>Exploratory data analysis</h2>
+<p>Generate descriptive statistics for microbiome relative abundance
+data, calculating mean, standard deviations and rate of missing
+values</p>
+<pre class="r"><code># descriptive stats for top 20 abundant genus 
+df_input_data_long &lt;- df_input_data %&gt;%
+  rownames_to_column(&quot;sample&quot;) %&gt;%
+  gather(key=&quot;genus&quot;, value=&quot;rel_abund&quot;, -sample) #reshape short to long data frame 
+
+summary_genus &lt;- df_input_data_long %&gt;% 
+  group_by(genus) %&gt;%
+  summarise(average = mean(rel_abund, na.rm=TRUE)*100,
+            std = sd(rel_abund, na.rm=TRUE)*100,
+            zero_rate = mean(rel_abund == 0)*100)%&gt;%
+  arrange(desc(average)) %&gt;%
+  head(20)  # top 20 genus based on average relative abundance 
+
+
+# display summary of relative abundance at genus level in a table 
+kable(summary_genus, 
+      col.names = c(&quot;Species&quot;,
+                    &quot;Average percentage&quot;,
+                    &quot;Standard deviation&quot;,
+                    &quot;Zeroness percentage&quot;),
+      caption = &#39;Descriptive statistics of top 20 abundant species&#39;,
+      format = &#39;html&#39;,
+      digits = 2) </code></pre>
+<table>
+<caption>
+Descriptive statistics of top 20 abundant species
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Species
+</th>
+<th style="text-align:right;">
+Average percentage
+</th>
+<th style="text-align:right;">
+Standard deviation
+</th>
+<th style="text-align:right;">
+Zeroness percentage
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+Faecalibacterium.prausnitzii
+</td>
+<td style="text-align:right;">
+10.86
+</td>
+<td style="text-align:right;">
+11.38
+</td>
+<td style="text-align:right;">
+3.82
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.uniformis
+</td>
+<td style="text-align:right;">
+7.63
+</td>
+<td style="text-align:right;">
+10.25
+</td>
+<td style="text-align:right;">
+12.79
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.vulgatus
+</td>
+<td style="text-align:right;">
+6.85
+</td>
+<td style="text-align:right;">
+9.98
+</td>
+<td style="text-align:right;">
+8.78
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.stercoris
+</td>
+<td style="text-align:right;">
+5.99
+</td>
+<td style="text-align:right;">
+10.79
+</td>
+<td style="text-align:right;">
+33.35
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Prevotella.copri
+</td>
+<td style="text-align:right;">
+4.71
+</td>
+<td style="text-align:right;">
+14.99
+</td>
+<td style="text-align:right;">
+72.48
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Eubacterium.rectale
+</td>
+<td style="text-align:right;">
+3.92
+</td>
+<td style="text-align:right;">
+6.08
+</td>
+<td style="text-align:right;">
+17.37
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.ovatus
+</td>
+<td style="text-align:right;">
+3.66
+</td>
+<td style="text-align:right;">
+6.24
+</td>
+<td style="text-align:right;">
+17.30
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Alistipes.putredinis
+</td>
+<td style="text-align:right;">
+3.11
+</td>
+<td style="text-align:right;">
+4.62
+</td>
+<td style="text-align:right;">
+41.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Subdoligranulum.unclassified
+</td>
+<td style="text-align:right;">
+3.05
+</td>
+<td style="text-align:right;">
+4.27
+</td>
+<td style="text-align:right;">
+3.07
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.fragilis
+</td>
+<td style="text-align:right;">
+3.00
+</td>
+<td style="text-align:right;">
+7.84
+</td>
+<td style="text-align:right;">
+44.14
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.caccae
+</td>
+<td style="text-align:right;">
+2.95
+</td>
+<td style="text-align:right;">
+4.47
+</td>
+<td style="text-align:right;">
+32.79
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Roseburia.intestinalis
+</td>
+<td style="text-align:right;">
+2.65
+</td>
+<td style="text-align:right;">
+7.97
+</td>
+<td style="text-align:right;">
+37.24
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.dorei
+</td>
+<td style="text-align:right;">
+2.59
+</td>
+<td style="text-align:right;">
+8.74
+</td>
+<td style="text-align:right;">
+34.29
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.massiliensis
+</td>
+<td style="text-align:right;">
+1.90
+</td>
+<td style="text-align:right;">
+5.08
+</td>
+<td style="text-align:right;">
+63.82
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Parabacteroides.merdae
+</td>
+<td style="text-align:right;">
+1.82
+</td>
+<td style="text-align:right;">
+3.07
+</td>
+<td style="text-align:right;">
+42.88
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.thetaiotaomicron
+</td>
+<td style="text-align:right;">
+1.78
+</td>
+<td style="text-align:right;">
+4.08
+</td>
+<td style="text-align:right;">
+29.72
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Escherichia.coli
+</td>
+<td style="text-align:right;">
+1.64
+</td>
+<td style="text-align:right;">
+6.52
+</td>
+<td style="text-align:right;">
+38.87
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Akkermansia.muciniphila
+</td>
+<td style="text-align:right;">
+1.23
+</td>
+<td style="text-align:right;">
+5.19
+</td>
+<td style="text-align:right;">
+63.76
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Bacteroides.eggerthii
+</td>
+<td style="text-align:right;">
+1.14
+</td>
+<td style="text-align:right;">
+4.86
+</td>
+<td style="text-align:right;">
+80.63
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Parabacteroides.distasonis
+</td>
+<td style="text-align:right;">
+1.12
+</td>
+<td style="text-align:right;">
+3.40
+</td>
+<td style="text-align:right;">
+41.38
+</td>
+</tr>
+</tbody>
+</table>
+<pre class="r"><code># inspect metadata 
+
+df_input_metadata # print paged table </code></pre>
+<pre><code>##                    site age diagnosis subject antibiotics dysbiosis_binary dysbiosis dysbiosisnonIBD dysbiosisUC dysbiosisCD
+## CSM5FZ3N_P Cedars-Sinai  43        CD   C3001          No               No 0.7923148              No          No          No
+## CSM5FZ3R_P Cedars-Sinai  43        CD   C3001          No               No 0.8379234              No          No          No
+## CSM5FZ3T_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9242969              No          No         Yes
+## CSM5FZ3V_P Cedars-Sinai  43        CD   C3001          No               No 0.8304005              No          No          No
+## CSM5FZ3X_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9109670              No          No         Yes
+## CSM5FZ3Z_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9122817              No          No         Yes
+## CSM5FZ42_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9030491              No          No         Yes
+## CSM5FZ44_P Cedars-Sinai  76        CD   C3002          No              Yes 0.8782548              No          No         Yes
+## CSM5FZ46_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9254287              No          No         Yes
+## CSM5FZ4A_P Cedars-Sinai  47        UC   C3004          No               No 0.7751605              No          No          No
+## CSM5FZ4C_P Cedars-Sinai  43        CD   C3001          No               No 0.8362446              No          No          No
+## CSM5FZ4E_P Cedars-Sinai  43        UC   C3003         Yes               No 0.7876165              No          No          No
+## CSM5FZ4G_P Cedars-Sinai  43        UC   C3003          No               No 0.6812845              No          No          No
+## CSM5FZ4K_P Cedars-Sinai  43        UC   C3003         Yes               No 0.7171648              No          No          No
+## CSM5FZ4M   Cedars-Sinai  43        UC   C3003          No               No 0.7613002              No          No          No
+## CSM5LLGB_P          MGH  30        CD   M2014          No               No 0.7305259              No          No          No
+## CSM5MCTZ_P Cedars-Sinai  32        UC   C3006          No               No 0.6904776              No          No          No
+## CSM5MCU4_P Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9603405              No          No         Yes
+## CSM5MCU8_P Cedars-Sinai  47        UC   C3004          No               No 0.7487518              No          No          No
+## CSM5MCUA_P Cedars-Sinai  47        UC   C3004          No               No 0.7647561              No          No          No
+## CSM5MCUC_P Cedars-Sinai  47        UC   C3004          No               No 0.7534720              No          No          No
+## CSM5MCUE_P Cedars-Sinai  47        UC   C3004          No               No 0.7661612              No          No          No
+## CSM5MCUG_P Cedars-Sinai  32        UC   C3006          No               No 0.6319956              No          No          No
+## CSM5MCUK_P Cedars-Sinai  32        UC   C3006          No               No 0.6598336              No          No          No
+## CSM5MCUO   Cedars-Sinai  32        UC   C3006          No               No 0.6329523              No          No          No
+## CSM5MCUQ_P Cedars-Sinai  76        UC   C3005          No               No 0.7278737              No          No          No
+## CSM5MCUS_P Cedars-Sinai  76        UC   C3005          No               No 0.6985879              No          No          No
+## CSM5MCUW_P Cedars-Sinai  76        UC   C3005          No               No 0.7591088              No          No          No
+## CSM5MCUY_P Cedars-Sinai  76        UC   C3005          No               No 0.7505013              No          No          No
+## CSM5MCV1_P Cedars-Sinai  NA        CD   C3007          No              Yes 0.9186404            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+## CSM5MCV5_P Cedars-Sinai  NA        CD   C3007          No               No 0.6500225            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+## CSM5MCVB_P Cedars-Sinai  NA        CD   C3007          No              Yes 0.9608783            &lt;NA&gt;        &lt;NA&gt;        &lt;NA&gt;
+## CSM5MCVD_P Cedars-Sinai  43        CD   C3001          No               No 0.7905148              No          No          No
+## CSM5MCVF_P Cedars-Sinai  43        CD   C3001          No              Yes 0.8532258              No          No         Yes
+## CSM5MCVJ_P Cedars-Sinai  76        CD   C3002          No              Yes 0.9297066              No          No         Yes
+## CSM5MCVL   Cedars-Sinai  76        CD   C3002          No              Yes 0.9126064              No          No         Yes
+## CSM5MCVN   Cedars-Sinai  76        CD   C3002          No              Yes 0.9168947              No          No         Yes
+## CSM5MCVV_P Cedars-Sinai  43        CD   C3001          No               No 0.8172277              No          No          No
+## CSM5MCVZ_P Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9711820              No          No         Yes
+## CSM5MCW4_P Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9699895              No          No         Yes
+## CSM5MCW6   Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9627506              No          No         Yes
+## CSM5MCWA_P Cedars-Sinai  56        CD   C3009          No              Yes 0.9034612              No          No         Yes
+## CSM5MCWC   Cedars-Sinai  56        CD   C3009          No              Yes 0.9379072              No          No         Yes
+## CSM5MCWE   Cedars-Sinai  56        CD   C3009          No              Yes 0.9485329              No          No         Yes
+## CSM5MCWG   Cedars-Sinai  56        CD   C3009         Yes              Yes 0.9994211              No          No         Yes
+## CSM5MCWI_P Cedars-Sinai  43        CD   C3001          No              Yes 0.8489802              No          No         Yes
+## CSM5MCWK_P Cedars-Sinai  51        CD   C3010          No               No 0.6731142              No          No          No
+## CSM5MCWM_P Cedars-Sinai  43        UC   C3003          No               No 0.7762045              No          No          No
+## CSM5MCWQ   Cedars-Sinai  43        UC   C3003          No               No 0.7168451              No          No          No
+## CSM5MCX3   Cedars-Sinai  32        UC   C3006          No               No 0.6256266              No          No          No
+## CSM5MCXB_P Cedars-Sinai  37        UC   C3011          No               No 0.7532757              No          No          No
+## CSM5MCXD   Cedars-Sinai  43        CD   C3001          No               No 0.7804802              No          No          No
+## CSM5MCXF_P Cedars-Sinai  37        CD   C3012          No               No 0.6436532              No          No          No
+## CSM5MCXH   Cedars-Sinai  47        UC   C3004          No               No 0.6988267              No          No          No
+## CSM5MCXJ   Cedars-Sinai  47        UC   C3004          No               No 0.7191541              No          No          No
+## CSM5MCXL   Cedars-Sinai  47        UC   C3004          No               No 0.7049218              No          No          No
+## CSM5MCXN   Cedars-Sinai  47        UC   C3004          No               No 0.6110559              No          No          No
+## CSM5MCXP   Cedars-Sinai  47        UC   C3004          No               No 0.6922469              No          No          No
+## CSM5MCXR   Cedars-Sinai  47        UC   C3004          No               No 0.7311004              No          No          No
+## CSM5MCXT   Cedars-Sinai  51        CD   C3010          No               No 0.6595739              No          No          No
+## CSM5MCXV   Cedars-Sinai  51        CD   C3010          No               No 0.6711215              No          No          No
+## CSM5MCXX_P Cedars-Sinai  51        CD   C3010          No               No 0.6505116              No          No          No
+## CSM5MCXZ_P Cedars-Sinai  51        CD   C3010         Yes               No 0.7119255              No          No          No
+## CSM5MCY2   Cedars-Sinai  51        CD   C3010          No               No 0.6520044              No          No          No
+## CSM5MCY4   Cedars-Sinai  76        UC   C3005          No               No 0.7246286              No          No          No
+## CSM5MCY8   Cedars-Sinai  76        UC   C3005          No               No 0.7566538              No          No          No
+## CSM5MCYI_P Cedars-Sinai  37        UC   C3011          No               No 0.7931680              No          No          No
+## CSM5MCYM_P Cedars-Sinai  37        UC   C3011          No               No 0.7087479              No          No          No
+## CSM5MCYO_P Cedars-Sinai  37        UC   C3011          No               No 0.6873382              No          No          No
+## CSM5MCYQ_P Cedars-Sinai  37        UC   C3011          No               No 0.7606666              No          No          No
+## CSM5MCYS   Cedars-Sinai  43        CD   C3001          No              Yes 0.8394600              No          No         Yes
+## CSM5MCYU_P Cedars-Sinai  26        UC   C3013          No               No 0.8310859              No          No          No
+## CSM5MCYW   Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9581773              No          No         Yes
+## CSM5MCZ3   Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9429273              No          No         Yes
+## CSM5MCZ5   Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9502114              No          No         Yes
+## CSM5MCZ7   Cedars-Sinai  53        CD   C3008         Yes              Yes 0.9612376              No          No         Yes
+## CSM5MCZB   Cedars-Sinai  37        CD   C3012          No               No 0.7198483              No          No          No
+## CSM5MCZD   Cedars-Sinai  37        CD   C3012          No               No 0.6098526              No          No          No
+## CSM5MCZF   Cedars-Sinai  37        CD   C3012          No               No 0.6162411              No          No          No
+## CSM5YRY7_P Cedars-Sinai  43        CD   C3001          No              Yes 0.8569618              No          No         Yes
+## CSM67U9B   Cedars-Sinai  37        CD   C3012          No               No 0.6459069              No          No          No
+## CSM67U9D   Cedars-Sinai  37        CD   C3012          No               No 0.6280079              No          No          No
+## CSM67U9H   Cedars-Sinai  26        UC   C3013          No              Yes 0.8775340              No         Yes          No
+## CSM67U9H_P Cedars-Sinai  26        UC   C3013          No              Yes 0.8845934              No         Yes          No
+## CSM67U9J   Cedars-Sinai  43        CD   C3001          No               No 0.8362868              No          No          No
+## CSM67U9N   Cedars-Sinai  26        UC   C3013          No               No 0.7320174              No          No          No
+## CSM67U9P_P Cedars-Sinai  26        UC   C3013          No               No 0.7489914              No          No          No
+## CSM67U9R_P Cedars-Sinai  26        UC   C3013          No               No 0.7931277              No          No          No
+## CSM67U9T_P Cedars-Sinai  50        UC   C3015          No               No 0.8178664              No          No          No
+## CSM67U9V_P Cedars-Sinai  32        CD   C3016          No               No 0.7158712              No          No          No
+##            collection
+## CSM5FZ3N_P          1
+## CSM5FZ3R_P          2
+## CSM5FZ3T_P          1
+## CSM5FZ3V_P          4
+## CSM5FZ3X_P          2
+## CSM5FZ3Z_P          3
+## CSM5FZ42_P          4
+## CSM5FZ44_P          5
+## CSM5FZ46_P          6
+## CSM5FZ4A_P          1
+## CSM5FZ4C_P          5
+## CSM5FZ4E_P          2
+## CSM5FZ4G_P          3
+## CSM5FZ4K_P          5
+## CSM5FZ4M            6
+## CSM5LLGB_P          8
+## CSM5MCTZ_P          1
+## CSM5MCU4_P          1
+## CSM5MCU8_P          3
+## CSM5MCUA_P          4
+## CSM5MCUC_P          5
+## CSM5MCUE_P          6
+## CSM5MCUG_P          2
+## CSM5MCUK_P          4
+## CSM5MCUO            6
+## CSM5MCUQ_P          2
+## CSM5MCUS_P          3
+## CSM5MCUW_P          5
+## CSM5MCUY_P          6
+## CSM5MCV1_P          2
+## CSM5MCV5_P          4
+## CSM5MCVB_P          1
+## CSM5MCVD_P          7
+## CSM5MCVF_P          8
+## CSM5MCVJ_P          7
+## CSM5MCVL            8
+## CSM5MCVN            9
+## CSM5MCVV_P          9
+## CSM5MCVZ_P          3
+## CSM5MCW4_P          4
+## CSM5MCW6            5
+## CSM5MCWA_P          3
+## CSM5MCWC            4
+## CSM5MCWE            5
+## CSM5MCWG            6
+## CSM5MCWI_P         10
+## CSM5MCWK_P          1
+## CSM5MCWM_P          7
+## CSM5MCWQ            9
+## CSM5MCX3            9
+## CSM5MCXB_P          1
+## CSM5MCXD           11
+## CSM5MCXF_P          1
+## CSM5MCXH            7
+## CSM5MCXJ            8
+## CSM5MCXL            9
+## CSM5MCXN           10
+## CSM5MCXP           11
+## CSM5MCXR           12
+## CSM5MCXT            2
+## CSM5MCXV            3
+## CSM5MCXX_P          4
+## CSM5MCXZ_P          5
+## CSM5MCY2            6
+## CSM5MCY4            7
+## CSM5MCY8            9
+## CSM5MCYI_P          2
+## CSM5MCYM_P          4
+## CSM5MCYO_P          5
+## CSM5MCYQ_P          6
+## CSM5MCYS           13
+## CSM5MCYU_P          1
+## CSM5MCYW            6
+## CSM5MCZ3            9
+## CSM5MCZ5           13
+## CSM5MCZ7           14
+## CSM5MCZB            2
+## CSM5MCZD            3
+## CSM5MCZF            4
+## CSM5YRY7_P          3
+## CSM67U9B            5
+## CSM67U9D            6
+## CSM67U9H            2
+## CSM67U9H_P          2
+## CSM67U9J           14
+## CSM67U9N            4
+## CSM67U9P_P          5
+## CSM67U9R_P          6
+## CSM67U9T_P          1
+## CSM67U9V_P          1
+##  [ reached &#39;max&#39; / getOption(&quot;max.print&quot;) -- omitted 1505 rows ]</code></pre>
+<p>Visualize relationship between representative genus and dysbiosis
+(continuous variable), stratified by diagnosis status</p>
+<pre class="r"><code>#extract top 10 genus with highest average of relative abundance 
+top10_g &lt;- summary_genus %&gt;% 
+  arrange(desc(average)) %&gt;% 
+  head(10) %&gt;% 
+  pull(genus)
+
+#select top 10 representative genus 
+df_input_data_top &lt;- df_input_data %&gt;% 
+  select(all_of(top10_g)) %&gt;% 
+  rownames_to_column(&quot;subject_id&quot;)
+
+#subset dysbiosis and diagnosis variables 
+df_input_metadata_sub &lt;- df_input_metadata %&gt;% 
+  select(diagnosis, dysbiosis) %&gt;% 
+  rownames_to_column(&quot;subject_id&quot;) 
+
+#merge microbiome data and metadata 
+merge_micro_meta_top &lt;- df_input_data_top %&gt;% 
+  inner_join(df_input_metadata_sub, by=&quot;subject_id&quot;)</code></pre>
+<pre class="r"><code># scatter plot given genus vs dysbiosis with faceting by diagnosis status (for instance, F. prausnitzii)
+require(RColorBrewer)
+
+ggplot(merge_micro_meta_top, aes(x= dysbiosis, 
+                                 y=Faecalibacterium.prausnitzii,
+                                 color=diagnosis))+
+  geom_point(alpha=0.7)+
+  geom_smooth(method = &quot;lm&quot;,
+              se=FALSE)+
+  scale_color_brewer(palette = &quot;Dark2&quot;)+
+  theme_minimal()</code></pre>
+<div class="figure" style="text-align: center">
+<img src="about_files/figure-html/plot-1.png" alt="Relationship between representative top genus and diagnosis" width="576" />
+<p class="caption">
+Relationship between representative top genus and diagnosis
+</p>
+</div>
+<p>There were 11 covariates in mete-data as follows, <code>age</code>,
+<code>dysbiosis</code>, and <code>collection</code> were numerical
+variables; and <code>site</code>, <code>diagnosis</code>,
+<code>subject</code>, <code>antibiotics</code>,
+<code>dysbiosis_binary</code>, <code>dysbiosisnonIBD</code>,
+<code>dysbiosisUC</code>, <code>dysbiosisCD</code> were character
+variables.</p>
+<p>In addition, missing values were present in three variables,
+<code>dysbiosisnonIBD</code>, <code>dysbiosisUC</code>,
+<code>dysbosisCD</code>.</p>
+<pre class="r"><code># convert some character variables to factor variables 
+# diagnosis 
+df_input_metadata$diagnosis &lt;- factor(df_input_metadata$diagnosis, 
+                                      levels = c(&quot;nonIBD&quot;, # set &quot;nonIBD&quot; a reference level 
+                                                 &quot;UC&quot;,
+                                                 &quot;CD&quot;))
+
+# convert remaining character variables to binary factor variables  
+df_input_metadata &lt;- df_input_metadata %&gt;% 
+  mutate(site = factor(site),
+         antibiotics = factor(antibiotics),  
+         dysbiosis_binary = factor(dysbiosis_binary),
+         dysbiosisnonIBD = factor(dysbiosisnonIBD),
+         dysbiosisUC = factor(dysbiosisUC),
+         dysbiosisCD = factor(dysbiosisCD)) 
+
+# summary(df_input_metadata) # investigate again the resulting meta-data </code></pre>
+<p>Calculate median and IQR for numerical variables; and subtotal
+(percentages) for categorical variables. Conduct chi-square test on
+categorical variables and do ANOVA on numerical variables within each
+strata according to diagnosis.Use a table to display summary.</p>
+<pre class="r"><code># site distribution by diagnosis levels 
+df_site &lt;- tabyl(df_input_metadata, site, diagnosis) %&gt;% 
+  adorn_totals(c(&quot;row&quot;, &quot;col&quot;))%&gt;%
+  adorn_percentages(&quot;row&quot;) %&gt;% 
+  adorn_pct_formatting(digits = 0) %&gt;% 
+  adorn_ns() %&gt;%  # combine count and percentage 
+  add_row(site = &quot;site&quot;, 
+          .before = 1) %&gt;%  #add one row showing variable name 
+  filter(row_number() !=7) #remove total row </code></pre>
+<p>Follow the instruction in <a
+href="https://dplyr.tidyverse.org/articles/programming.html">programming
+with dyplyr</a></p>
+<p>Apply the function to multiple categorical variables. Subset only
+categorical variables from <code>df_input_metadata</code>.</p>
+<pre class="r"><code>cat_cov &lt;- df_input_metadata %&gt;% 
+  select(where(is.factor)) %&gt;% 
+  select(-diagnosis) %&gt;% 
+  colnames()
+
+sum_cat &lt;- lapply(cat_cov, count_pct) #list of summary of multiple categorical variables  </code></pre>
+<pre><code>## Warning: Use of .data in tidyselect expressions was deprecated in tidyselect 1.2.0.
+## ℹ Please use `all_of(var)` (or `any_of(var)`) instead of `.data[[var]]`</code></pre>
+<pre class="r"><code># combine each element of the list by rows before storing in a data frame 
+df_sum_cat &lt;- as.data.frame(do.call(rbind, sum_cat))</code></pre>
+<pre class="r"><code>str(df_input_metadata)
+
+numerical_summary &lt;- function(x){
+dat_ns &lt;- df_input_metadata %&gt;% 
+  group_by(diagnosis) %&gt;% 
+  summarise(average = round(mean(.data[[x]], na.rm=T),2),
+            std = round(sd(.data[[x]], na.rm = T),2)) %&gt;% 
+  select(-average)
+  
+df_num_sub &lt;- df_input_metadata %&gt;% 
+  group_by(diagnosis) %&gt;% 
+  summarise(average = round(mean(.data[[x]], na.rm=T),2)) %&gt;%
+  adorn_ns(ns = dat_ns)%&gt;% 
+  rename(&quot;average (sd)&quot;= average) %&gt;%
+  spread(key=diagnosis, value = &quot;average (sd)&quot;) %&gt;% 
+  mutate(covariable = x) %&gt;% 
+  select(covariable, 1:3)
+
+
+total_dat_ns &lt;- df_input_metadata %&gt;%
+  summarise(average = round(mean(.data[[x]], na.rm=T),2),
+            std = round(sd(.data[[x]], na.rm = T),2)) %&gt;%
+  select(-average) %&gt;%
+  mutate(covariable = x) %&gt;% 
+  select(covariable, std)
+  
+df_num &lt;- df_input_metadata %&gt;%
+  summarise(average = round(mean(.data[[x]], na.rm=T),2)) %&gt;%
+  mutate(covariable = x) %&gt;% 
+  select(covariable, average) %&gt;% 
+  adorn_ns(ns = total_dat_ns) %&gt;% 
+  rename(&quot;average (sd)&quot; = average)
+
+df_num_bind &lt;- cbind(df_num_sub, df_num[,2]) 
+
+colnames(df_num_bind)[5] &lt;- &quot;overall&quot;
+
+print(df_num_bind) 
+}
+
+numerical_summary(&quot;age&quot;) #the resulting function works properly</code></pre>
+<p>Apply the function <code>numerical_summary</code> to all the
+numerical variables in meta-data with <code>lapply</code>.</p>
+<pre class="r"><code># extract column names for all the numerical variables in meta-data 
+num_names &lt;- df_input_metadata %&gt;% 
+  select(where(is.numeric)) %&gt;% 
+  colnames()
+
+list_num_summary &lt;- lapply(num_names, numerical_summary) 
+  
+# str(list_num_summary) 
+
+# convert individual element of the list to data frames and bind them into a single data frame 
+df_num_summary &lt;- as.data.frame(do.call(rbind, list_num_summary)) </code></pre>
+<p>Combine descriptive stats tables, <code>df_sum_cat</code> and
+<code>df_num_summary</code> for categorical and numerical covariables,
+respectively</p>
+<pre class="r"><code># head(df_sum_cat, 3)
+# head(df_num_summary, 3)
+
+names(df_sum_cat)[5] &lt;- &quot;overall&quot;  #rename the column name
+
+df_all_cov &lt;- bind_rows(df_sum_cat, df_num_summary) #bind by rows 
+
+#replace NA in the column, &quot;co variable&quot; with &quot; unknown&quot;
+df_all_cov$covariable &lt;- as.character(df_all_cov$covariable)
+df_all_cov$covariable %&gt;% replace_na(&quot;unknown&quot;)  </code></pre>
+<pre><code>##  [1] &quot;site&quot;             &quot;Cedars-Sinai&quot;     &quot;Cincinnati&quot;       &quot;Emory&quot;            &quot;MGH&quot;              &quot;MGH Pediatrics&quot;  
+##  [7] &quot;antibiotics&quot;      &quot;No&quot;               &quot;Yes&quot;              &quot;dysbiosis_binary&quot; &quot;No&quot;               &quot;Yes&quot;             
+## [13] &quot;dysbiosisnonIBD&quot;  &quot;No&quot;               &quot;Yes&quot;              &quot;unknown&quot;          &quot;dysbiosisUC&quot;      &quot;No&quot;              
+## [19] &quot;Yes&quot;              &quot;unknown&quot;          &quot;dysbiosisCD&quot;      &quot;No&quot;               &quot;Yes&quot;              &quot;unknown&quot;         
+## [25] &quot;age&quot;              &quot;dysbiosis&quot;        &quot;collection&quot;</code></pre>
+<p>Apply chi-square test and ANOVA to categorical descriptive stats and
+numerical descriptive stats, respectively</p>
+<pre class="r"><code># write a function to do chi-square to categorical variables 
+chi_square &lt;- function(x){
+  chisq &lt;- chisq.test(df_input_metadata[[x]], df_input_metadata$diagnosis)
+  
+  pval &lt;- chisq$p.value
+  
+  pval_digit &lt;- format(round(pval, 3), nsmall=4)
+  
+  print(pval_digit)
+  
+}
+
+# chi_square(&quot;site&quot;)
+
+df_pval_cat &lt;- data.frame(covariable = cat_cov, 
+                          pvalue = numeric(length = length(cat_cov)))   #create empty df to store p-values 
+
+df_pval_cat$pvalue &lt;- sapply(cat_cov, chi_square) </code></pre>
+<pre><code>## [1] &quot;0.0000&quot;
+## [1] &quot;0.0000&quot;
+## [1] &quot;0.0000&quot;
+## [1] &quot;0.0000&quot;
+## [1] &quot;0.0000&quot;
+## [1] &quot;0.0000&quot;</code></pre>
+<pre class="r"><code>#write a function to do anova to numerical variables against diagnosis 
+anova_num &lt;- function(x){
+  f &lt;- paste0(x, &quot;~&quot;, &quot;diagnosis&quot;)
+  
+  pval &lt;- anova(lm(f, data=df_input_metadata))$&quot;Pr(&gt;F)&quot;[1]
+  
+  pval_digit &lt;- format(round(pval, 3), nsmall=5)
+  
+  print(pval_digit)
+}
+
+df_pval_num &lt;- data.frame(covariable = num_names, 
+                          pvalue = numeric(length = length(num_names)))   #create empty df to store p-values 
+
+df_pval_num$pvalue &lt;- sapply(num_names, anova_num) </code></pre>
+<pre><code>## [1] &quot;0.00000&quot;
+## [1] &quot;0.00000&quot;
+## [1] &quot;0.61700&quot;</code></pre>
+<pre class="r"><code>#join p-values with descriptive stats table 
+df_all_cov_pval &lt;- df_all_cov %&gt;% 
+  left_join(df_pval_num, by=&quot;covariable&quot;) %&gt;% 
+  left_join(df_pval_cat, by=&quot;covariable&quot;)  
+
+df_all_cov_pval$pvalue.x &lt;- if_else(!is.na(df_all_cov_pval$pvalue.x), 
+                            df_all_cov_pval$pvalue.x,
+                            df_all_cov_pval$pvalue.y)  
+
+df_all_cov_pval$covariable &lt;- if_else(!is.na(df_all_cov_pval$covariable), 
+                            df_all_cov_pval$covariable,
+                            &quot;unknown&quot;)  
+
+df_all_cov_pval2 &lt;- df_all_cov_pval %&gt;% select(-pvalue.y) %&gt;% rename(pvalue = pvalue.x) 
+
+df_all_cov_pval2 #view the resulting table</code></pre>
+<pre><code>##          covariable        nonIBD            UC            CD       overall  pvalue
+## 1              site          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;  0.0000
+## 2      Cedars-Sinai      5%  (21)     40% (164)     55% (222)   100%  (407)    &lt;NA&gt;
+## 3        Cincinnati     34% (157)     20%  (94)     46% (211)   100%  (462)    &lt;NA&gt;
+## 4             Emory      8%   (5)     25%  (16)     67%  (42)   100%   (63)    &lt;NA&gt;
+## 5               MGH     45% (198)     23% (100)     33% (146)   100%  (444)    &lt;NA&gt;
+## 6    MGH Pediatrics     21%  (45)     29%  (63)     51% (111)   100%  (219)    &lt;NA&gt;
+## 7       antibiotics          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;  0.0000
+## 8                No     29% (410)     29% (414)     43% (613)   100% (1437)    &lt;NA&gt;
+## 9               Yes     10%  (16)     15%  (23)     75% (119)   100%  (158)    &lt;NA&gt;
+## 10 dysbiosis_binary          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;  0.0000
+## 11               No     29% (383)     29% (386)     42% (554)   100% (1323)    &lt;NA&gt;
+## 12              Yes     16%  (43)     19%  (51)     65% (178)   100%  (272)    &lt;NA&gt;
+## 13  dysbiosisnonIBD          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;  0.0000
+## 14               No     25% (383)     28% (436)     47% (714)   100% (1533)    &lt;NA&gt;
+## 15              Yes    100%  (43)      0%   (0)      0%   (0)   100%   (43)    &lt;NA&gt;
+## 16          unknown      0%   (0)      5%   (1)     95%  (18)   100%   (19)    &lt;NA&gt;
+## 17      dysbiosisUC          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;  0.0000
+## 18               No     28% (426)     25% (386)     47% (714)   100% (1526)    &lt;NA&gt;
+## 19              Yes      0%   (0)    100%  (50)      0%   (0)   100%   (50)    &lt;NA&gt;
+## 20          unknown      0%   (0)      5%   (1)     95%  (18)   100%   (19)    &lt;NA&gt;
+## 21      dysbiosisCD          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;          &lt;NA&gt;  0.0000
+## 22               No     30% (426)     31% (436)     38% (539)   100% (1401)    &lt;NA&gt;
+## 23              Yes      0%   (0)      0%   (0)    100% (175)   100%  (175)    &lt;NA&gt;
+## 24          unknown      0%   (0)      5%   (1)     95%  (18)   100%   (19)    &lt;NA&gt;
+## 25              age 29.12 (19.96) 29.83 (18.28) 25.71  (16.3) 27.77 (17.99) 0.00000
+## 26        dysbiosis   0.74 (0.07)   0.75 (0.07)   0.78  (0.1)   0.76 (0.09) 0.00000
+## 27       collection  11.00 (6.78)  10.59 (6.59)  10.92  (6.7)  10.85 (6.69) 0.61700</code></pre>
+</div>
+</div>
+<div id="fit-the-mdoel" class="section level1">
+<h1>Fit the mdoel</h1>
+<p>Run MaAsLin2 on the HMP2 data, building a multiple regression model
+to evaluate the association between microbial species (relative
+abundance) and <code>dysbiosis</code> scores adjusting for IBD
+<code>diagnosis</code> status.</p>
+<p>Key arguments were set as followings,  - linear regression was used
+for data modeling <code>analysis_method</code> = <code>LM</code> - set
+the minimal threshold for taxa prevalence as 0.1
+<code>min_prevalence</code> = <code>0.1</code> - set the minimal
+threshold for taxa relative abundance as 0.01%
+<code>min_abundance</code> = <code>0.0001</code> - fixed effect
+variables <code>fixed_effects</code> =
+<code>c("diagnosis", "dysbiosis")</code> - random effect variable
+<code>random_effects</code> = <code>c("subject")</code><br />
+- set the baseline for the categorical variable <code>diagnosis</code>
+<code>reference</code> = <code>c("diagnosis","nonIBD")</code></p>
+<p>Note that MaAsLin2 can not yet handle interaction terms directly in
+model building. Alternatively, persons can add additional interactive
+covariables in the input data frame prior to modeling.</p>
+<pre class="r"><code>fit_data2 &lt;- Maaslin2(
+        input_data = df_input_data,
+        input_metadata = df_input_metadata,
+        min_prevalence = 0.1, #typical prevalence threshold: 10-50% (up to 70-90% can be reasonable)
+        min_abundance = 0.0001, #typical relative abundance threshold: 0.0001 
+        normalization = &quot;NONE&quot;,  #without additional normalization  
+        output = &quot;demo_output2&quot;,
+        max_significance = 0.1,
+        plot_heatmap = FALSE,
+        plot_scatter = FALSE,
+        analysis_method = &quot;LM&quot;,  #linear regression model 
+        fixed_effects = c(&quot;diagnosis&quot;, &quot;dysbiosis&quot;), # fixed effect variables, diagnosis and dysbiosis 
+        random_effects = c(&quot;subject&quot;), # random effect variable  
+        reference = c(&quot;diagnosis,nonIBD&quot;)) #set the baseline for the categorical variable, diagnosis 
+
+all_results &lt;- fit_data2$results #extract coefficients and q-value</code></pre>
+<div id="significant-taxa-checkup" class="section level2">
+<h2>Significant taxa checkup</h2>
+<p>significant associations is provided in
+<code>significant_results.tsv</code></p>
+<pre class="r"><code>sig_results &lt;- all_results %&gt;% 
+        filter(qval &lt;= 0.05) %&gt;% #sig threshold q value = 0.05 
+        arrange(qval)
+
+sig_results  # print in the paged table format </code></pre>
+<pre><code>##                                feature  metadata     value       coef     stderr          pval        name          qval    N
+## 1         Faecalibacterium.prausnitzii dysbiosis dysbiosis -2.6011472 0.08354458 1.817890e-165   dysbiosis 4.581083e-163 1595
+## 2         Subdoligranulum.unclassified dysbiosis dysbiosis -1.4570705 0.07092002  3.596769e-83   dysbiosis  4.531929e-81 1595
+## 3                Bacteroides.uniformis dysbiosis dysbiosis -2.1662652 0.11352360  2.940839e-73   dysbiosis  2.470305e-71 1595
+## 4                  Eubacterium.rectale dysbiosis dysbiosis -2.4477468 0.13298192  1.100929e-68   dysbiosis  6.935850e-67 1595
+## 5                   Ruminococcus.obeum dysbiosis dysbiosis -1.5238531 0.09744731  3.268299e-51   dysbiosis  1.647223e-49 1595
+## 6                 Alistipes.putredinis dysbiosis dysbiosis -2.0041024 0.13020836  6.495960e-50   dysbiosis  2.728303e-48 1595
+## 7                 Bacteroides.vulgatus dysbiosis dysbiosis -1.5428680 0.10038171  9.090160e-50   dysbiosis  3.272458e-48 1595
+## 8                     Alistipes.shahii dysbiosis dysbiosis -1.5599548 0.10353085  5.215580e-48   dysbiosis  1.642908e-46 1595
+## 9                    Coprococcus.comes dysbiosis dysbiosis -1.3888742 0.09977186  1.185529e-41   dysbiosis  3.319480e-40 1595
+## 10                 Eubacterium.eligens dysbiosis dysbiosis -1.8804274 0.13630211  5.628795e-41   dysbiosis  1.418456e-39 1595
+## 11              Eubacterium.ventriosum dysbiosis dysbiosis -1.4871462 0.11023766  2.395633e-39   dysbiosis  5.488177e-38 1595
+## 12                  Bacteroides.ovatus dysbiosis dysbiosis -1.3610466 0.10247943  3.137055e-38   dysbiosis  6.587815e-37 1595
+## 13               Alistipes.onderdonkii dysbiosis dysbiosis -1.4839959 0.11403005  7.699057e-37   dysbiosis  1.492433e-35 1595
+## 14            Odoribacter.splanchnicus dysbiosis dysbiosis -0.5530159 0.04273146  1.710236e-36   dysbiosis  3.078425e-35 1595
+## 15                   Dorea.longicatena dysbiosis dysbiosis -1.3892026 0.10815140  5.301340e-36   dysbiosis  8.906251e-35 1595
+## 16          Oscillibacter.unclassified dysbiosis dysbiosis -1.6929277 0.13330118  4.890734e-35   dysbiosis  7.702905e-34 1595
+## 17             Roseburia.inulinivorans dysbiosis dysbiosis -1.7229854 0.14234059  3.008344e-32   dysbiosis  4.459428e-31 1595
+## 18                  Clostridium.leptum dysbiosis dysbiosis -1.3460861 0.11295813  2.087420e-31   dysbiosis  2.922388e-30 1595
+## 19 Lachnospiraceae.bacterium.3.1.46FAA dysbiosis dysbiosis -1.2688707 0.10749048  6.915089e-31   dysbiosis  9.171592e-30 1595
+## 20              Parabacteroides.merdae dysbiosis dysbiosis -1.2160530 0.10409641  2.821779e-30   dysbiosis  3.555442e-29 1595
+## 21                  Bacteroides.caccae dysbiosis dysbiosis -1.2559018 0.11134842  2.069784e-28   dysbiosis  2.391922e-27 1595
+## 22                   Roseburia.hominis dysbiosis dysbiosis -1.7722118 0.15698298  2.088186e-28   dysbiosis  2.391922e-27 1595
+## 23              Bilophila.unclassified dysbiosis dysbiosis -1.1358835 0.10111122  3.126052e-28   dysbiosis  3.425066e-27 1595
+## 24             Collinsella.aerofaciens dysbiosis dysbiosis -1.1011637 0.09893962  9.253328e-28   dysbiosis  9.715995e-27 1595
+## 25                Alistipes.finegoldii dysbiosis dysbiosis -0.9409091 0.08628022  9.831942e-27   dysbiosis  9.910598e-26 1595
+## 26                 Eubacterium.siraeum dysbiosis dysbiosis -1.4619478 0.13696694  9.809497e-26   dysbiosis  9.507667e-25 1595
+## 27           Bacteroides.xylanisolvens dysbiosis dysbiosis -1.1185394 0.10700537  8.874247e-25   dysbiosis  8.282630e-24 1595
+## 28          Parabacteroides.distasonis dysbiosis dysbiosis -1.2314709 0.12086227  1.177432e-23   dysbiosis  1.059689e-22 1595
+## 29         Bacteroidales.bacterium.ph8 dysbiosis dysbiosis -0.8823028 0.08957245  2.978142e-22   dysbiosis  2.587903e-21 1595
+## 30        Bacteroides.thetaiotaomicron dysbiosis dysbiosis -1.0526770 0.11123531  1.056638e-20   dysbiosis  8.875760e-20 1595
+## 31                  Eubacterium.hallii dysbiosis dysbiosis -1.1356133 0.12189947  4.098493e-20   dysbiosis  3.331678e-19 1595
+## 32        Barnesiella.intestinihominis dysbiosis dysbiosis -0.7394744 0.08007195  8.371712e-20   dysbiosis  6.592723e-19 1595
+## 33               Klebsiella.pneumoniae dysbiosis dysbiosis  0.8130915 0.09488803  4.741206e-17   dysbiosis  3.620557e-16 1595
+## 34                Ruminococcus.torques dysbiosis dysbiosis -0.5958061 0.07036518  6.171992e-17   dysbiosis  4.574535e-16 1595
+## 35                 Ruminococcus.bromii dysbiosis dysbiosis -1.0361481 0.12567934  3.435980e-16   dysbiosis  2.473905e-15 1595
+## 36               Bacteroides.stercoris dysbiosis dysbiosis -1.0771879 0.13644892  5.467638e-15   dysbiosis  3.827347e-14 1595
+## 37                   Bacteroides.dorei dysbiosis dysbiosis -0.9347843 0.12114858  2.126226e-14   dysbiosis  1.448132e-13 1595
+## 38              Roseburia.intestinalis dysbiosis dysbiosis -1.3590403 0.17818682  4.183818e-14   dysbiosis  2.774532e-13 1595
+## 39               Bacteroides.eggerthii dysbiosis dysbiosis -0.6373797 0.08590196  1.924022e-13   dysbiosis  1.243214e-12 1595
+## 40                   Dialister.invisus dysbiosis dysbiosis -0.8256632 0.11352333  5.518587e-13   dysbiosis  3.476710e-12 1595
+## 41              Bacteroides.finegoldii dysbiosis dysbiosis -0.6152847 0.09058887  1.573953e-11   dysbiosis  9.674051e-11 1595
+## 42        Bacteroides.cellulosilyticus dysbiosis dysbiosis -0.5958650 0.08927904  3.458233e-11   dysbiosis  2.074940e-10 1595
+## 43             Bifidobacterium.bifidum dysbiosis dysbiosis -0.5720200 0.08789327  1.017792e-10   dysbiosis  5.964732e-10 1595
+## 44              Flavonifractor.plautii dysbiosis dysbiosis -0.7424300 0.11558647  1.761869e-10   dysbiosis  1.009070e-09 1595
+## 45               Ruminococcus.lactaris dysbiosis dysbiosis -0.6429319 0.10372387  7.262353e-10   dysbiosis  4.066918e-09 1595
+## 46         Clostridium.clostridioforme dysbiosis dysbiosis  0.6880921 0.11477202  2.512079e-09   dysbiosis  1.376182e-08 1595
+## 47              Bifidobacterium.longum dysbiosis dysbiosis -0.7193631 0.12193393  4.442754e-09   dysbiosis  2.382072e-08 1595
+## 48        Acidaminococcus.unclassified dysbiosis dysbiosis -0.4647786 0.08005535  7.759552e-09   dysbiosis  4.073765e-08 1595
+## 49                    Escherichia.coli dysbiosis dysbiosis  0.7568216 0.13224554  1.264715e-08   dysbiosis  6.504246e-08 1595
+## 50           Sutterella.wadsworthensis dysbiosis dysbiosis -0.6283767 0.11646426  7.886010e-08   dysbiosis  3.974549e-07 1595
+## 51         Paraprevotella.unclassified dysbiosis dysbiosis -0.3816101 0.07387414  2.709964e-07   dysbiosis  1.339041e-06 1595
+## 52                Bacteroides.fragilis dysbiosis dysbiosis -0.7874375 0.15351702  3.267279e-07   dysbiosis  1.583374e-06 1595
+## 53          Coprobacillus.unclassified dysbiosis dysbiosis  0.5169648 0.10104121  3.529976e-07   dysbiosis  1.678404e-06 1595
+## 54        Bifidobacterium.adolescentis dysbiosis dysbiosis -0.5996010 0.11866470  4.853587e-07   dysbiosis  2.265007e-06 1595
+## 55         Parabacteroides.goldsteinii dysbiosis dysbiosis -0.2953743 0.06269543  2.678391e-06   dysbiosis  1.227190e-05 1595
+## 56   Bifidobacterium.pseudocatenulatum dysbiosis dysbiosis -0.3762470 0.08016101  2.920508e-06   dysbiosis  1.314228e-05 1595
+## 57    Burkholderiales.bacterium.1.1.47 dysbiosis dysbiosis -0.4703586 0.10098508  3.466102e-06   dysbiosis  1.532382e-05 1595
+## 58            Bacteroides.intestinalis dysbiosis dysbiosis -0.2551030 0.05526364  4.232375e-06   dysbiosis  1.838894e-05 1595
+## 59            Bacteroides.massiliensis dysbiosis dysbiosis -0.5377140 0.11803927  5.638991e-06   dysbiosis  2.408518e-05 1595
+## 60                Paraprevotella.clara dysbiosis dysbiosis -0.2339220 0.05222362  8.048728e-06   dysbiosis  3.380466e-05 1595
+## 61    Parasutterella.excrementihominis dysbiosis dysbiosis -0.4650693 0.10458800  9.328763e-06   dysbiosis  3.853850e-05 1595
+## 62                  Bacteroides.faecis dysbiosis dysbiosis -0.3572573 0.08158066  1.272332e-05   dysbiosis  5.171416e-05 1595
+## 63                 Ruminococcus.gnavus dysbiosis dysbiosis  0.5145550 0.13374588  1.242389e-04   dysbiosis  4.969555e-04 1595
+## 64               Ruminococcus.callidus dysbiosis dysbiosis -0.3996428 0.10647337  1.809752e-04   dysbiosis  7.125898e-04 1595
+## 65              Alistipes.unclassified dysbiosis dysbiosis  0.3030813 0.09772835  1.960836e-03   dysbiosis  7.602011e-03 1595
+## 66             Akkermansia.muciniphila diagnosis        UC -3.3594072 1.10540299  2.926899e-03 diagnosisUC  1.117543e-02 1595
+## 67 Lachnospiraceae.bacterium.1.1.57FAA dysbiosis dysbiosis -0.3761841 0.12742367  3.213970e-03   dysbiosis  1.208837e-02 1595
+## 68          Haemophilus.parainfluenzae dysbiosis dysbiosis -0.3978589 0.14004604  4.558251e-03   dysbiosis  1.689234e-02 1595
+## 69                 Clostridium.bolteae diagnosis        CD  2.4742078 0.88384443  6.047473e-03 diagnosisCD  2.208642e-02 1595
+## 70        Bifidobacterium.adolescentis diagnosis        CD -2.4950808 0.89668300  6.251557e-03 diagnosisCD  2.250560e-02 1595
+## 71         Parabacteroides.goldsteinii diagnosis        CD -1.6469205 0.59360570  6.379194e-03 diagnosisCD  2.264165e-02 1595
+## 72                Alistipes.putredinis diagnosis        UC -3.6369801 1.31939326  6.749794e-03 diagnosisUC  2.362428e-02 1595
+## 73                    Alistipes.shahii diagnosis        UC -3.1527621 1.18698509  8.959051e-03 diagnosisUC  3.092714e-02 1595
+## 74          Coprobacillus.unclassified diagnosis        UC  1.5317934 0.59373620  1.120062e-02 diagnosisUC  3.814265e-02 1595
+## 75                    Alistipes.shahii diagnosis        CD -2.7033406 1.07857588  1.351438e-02 diagnosisCD  4.493892e-02 1595
+## 76               Ruminococcus.callidus diagnosis        CD -1.5513433 0.61842332  1.355301e-02 diagnosisCD  4.493892e-02 1595
+## 77                 Ruminococcus.bromii diagnosis        CD -2.2848464 0.91646707  1.399249e-02 diagnosisCD  4.579360e-02 1595
+## 78             Roseburia.inulinivorans diagnosis        CD -1.9765504 0.79666921  1.452218e-02 diagnosisCD  4.691782e-02 1595
+##    N.not.zero
+## 1        1534
+## 2        1546
+## 3        1391
+## 4        1318
+## 5        1346
+## 6         940
+## 7        1455
+## 8         757
+## 9         848
+## 10       1015
+## 11        627
+## 12       1319
+## 13        896
+## 14        662
+## 15       1063
+## 16       1296
+## 17       1074
+## 18        812
+## 19        992
+## 20        911
+## 21       1072
+## 22       1061
+## 23        885
+## 24        835
+## 25        788
+## 26        656
+## 27       1072
+## 28        935
+## 29        472
+## 30       1121
+## 31        923
+## 32        484
+## 33        171
+## 34       1514
+## 35        512
+## 36       1063
+## 37       1048
+## 38       1001
+## 39        309
+## 40        777
+## 41        400
+## 42        526
+## 43        425
+## 44       1068
+## 45        454
+## 46        518
+## 47       1002
+## 48        194
+## 49        975
+## 50        432
+## 51        243
+## 52        891
+## 53        415
+## 54        555
+## 55        187
+## 56        230
+## 57        731
+## 58        193
+## 59        577
+## 60        191
+## 61        759
+## 62        604
+## 63        970
+## 64        323
+## 65        224
+## 66        578
+## 67        475
+## 68        887
+## 69       1138
+## 70        555
+## 71        187
+## 72        940
+## 73        757
+## 74        415
+## 75        757
+## 76        323
+## 77        512
+## 78       1074</code></pre>
+<p>Draw a volcano plot to illustrate q-values and coefficients</p>
+<pre class="r"><code># add a column to indicate significant genus 
+all_results_sig &lt;- all_results %&gt;% 
+  mutate(whether_sig = case_when(coef &gt;= 0.3 &amp; qval &lt;= 0.05 ~ &quot;Positive&quot;,
+                                 coef &lt;= -0.3 &amp; qval &lt;= 0.05 ~ &quot;Negative&quot;,
+                                 abs(coef) &lt; 0.3 | qval &gt;0.05 ~ &quot;No association&quot;)) 
+
+
+# add label column 
+all_results_sig$relabel &lt;- NA
+
+all_results_sig$relabel[all_results_sig$whether_sig != &quot;No association&quot;] &lt;- all_results_sig$feature[all_results_sig$whether_sig != &quot;No association&quot;]
+
+# set personal color palate 
+mycolors &lt;- c(&quot;blue&quot;, &quot;red&quot;, &quot;black&quot;)
+names(mycolors) &lt;- c(&quot;Negative&quot;, &quot;Positive&quot;, &quot;No association&quot;) 
+
+# volcano plot 
+all_results_sig %&gt;% 
+  filter(value == &quot;dysbiosis&quot;) %&gt;% #focus on dysbiosis 
+ggplot(aes(x=coef, y=-log10(qval),
+           color=whether_sig,
+           label=relabel))+
+  geom_point()+
+  geom_vline(xintercept = c(-0.3, 0.3), color=&quot;red&quot;)+
+  geom_hline(yintercept = -log10(0.05), color=&quot;red&quot;)+
+  scale_color_manual(values = mycolors)+
+  theme_minimal()+ 
+  geom_text_repel() #label taxa names </code></pre>
+<div class="figure" style="text-align: center">
+<img src="about_files/figure-html/volcano%20plot%20qval%20and%20coeff-1.png" alt="Illustration of coefficients and q-values of diagnosis scores for individual species" width="576" />
+<p class="caption">
+Illustration of coefficients and q-values of diagnosis scores for
+individual species
+</p>
+</div>
+</div>
+<div id="model-interpretation" class="section level2">
+<h2>Model interpretation</h2>
+<p>Use <code>Faecalibacterium.prausnitzii</code> as an example for model
+interpretation.</p>
+<pre class="r"><code>coef_Fae &lt;- all_results_sig %&gt;% 
+  filter(value == &quot;dysbiosis&quot;) %&gt;%
+  filter(feature == &quot;Faecalibacterium.prausnitzii&quot;) %&gt;%
+  select(coef) %&gt;% 
+  pull() %&gt;%
+  round(., 3) 
+
+qval_Fae &lt;- all_results_sig %&gt;% 
+  filter(value == &quot;dysbiosis&quot;) %&gt;%
+  filter(feature == &quot;Faecalibacterium.prausnitzii&quot;) %&gt;%
+  select(qval) %&gt;% 
+  pull() %&gt;%
+  format(., scientific=TRUE) </code></pre>
+<p><em>F. prausnitzii</em> is negatively associated with
+<code>dysbiosis</code> (q value = 4.581083e-163). In particularly,
+<em>F. prausnitzii</em> percentage in feces may decrease by 2.601 on
+average when <code>dysbiosis</code> scores increases by 1 unit
+independent of <code>diagnosis</code> status.</p>
+<pre class="r"><code># Sessoin information 
+sessionInfo()  </code></pre>
+<pre><code>## R version 4.2.1 (2022-06-23 ucrt)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 22621)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=English_United States.utf8  LC_CTYPE=English_United States.utf8    LC_MONETARY=English_United States.utf8
+## [4] LC_NUMERIC=C                           LC_TIME=English_United States.utf8    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+##  [1] RColorBrewer_1.1-3 bslib_0.4.1        ggrepel_0.9.2      rmarkdown_2.18     janitor_2.1.0      knitr_1.40        
+##  [7] forcats_0.5.2      stringr_1.4.1      dplyr_1.0.10       purrr_0.3.5        readr_2.1.3        tidyr_1.2.1       
+## [13] tibble_3.1.8       ggplot2_3.3.6      tidyverse_1.3.2    Maaslin2_1.12.0   
+## 
+## loaded via a namespace (and not attached):
+##  [1] nlme_3.1-160        fs_1.5.2            lubridate_1.8.0     httr_1.4.4          numDeriv_2016.8-1.1 tools_4.2.1        
+##  [7] backports_1.4.1     utf8_1.2.2          R6_2.5.1            DBI_1.1.3           mgcv_1.8-41         colorspace_2.0-3   
+## [13] withr_2.5.0         tidyselect_1.2.0    compiler_4.2.1      cli_3.4.1           rvest_1.0.3         logging_0.10-108   
+## [19] xml2_1.3.3          biglm_0.9-2.1       labeling_0.4.2      sass_0.4.2          scales_1.2.1        DEoptimR_1.0-11    
+## [25] mvtnorm_1.1-3       robustbase_0.95-0   pbapply_1.5-0       digest_0.6.29       minqa_1.2.5         pkgconfig_2.0.3    
+## [31] htmltools_0.5.3     lme4_1.1-31         lpsymphony_1.26.0   dbplyr_2.2.1        fastmap_1.1.0       highr_0.9          
+## [37] rlang_1.0.6         readxl_1.4.1        rstudioapi_0.14     jquerylib_0.1.4     generics_0.1.3      farver_2.1.1       
+## [43] jsonlite_1.8.2      googlesheets4_1.0.1 magrittr_2.0.3      Matrix_1.5-3        Rcpp_1.0.9          munsell_0.5.0      
+## [49] fansi_1.0.3         lifecycle_1.0.3     stringi_1.7.8       yaml_2.3.5          snakecase_0.11.0    MASS_7.3-58.1      
+## [55] grid_4.2.1          parallel_4.2.1      crayon_1.5.2        lattice_0.20-45     haven_2.5.1         splines_4.2.1      
+## [61] hash_2.2.6.2        hms_1.1.2           pillar_1.8.1        optparse_1.7.3      boot_1.3-28         reprex_2.0.2       
+## [67] glue_1.6.2          evaluate_0.18       modelr_0.1.10       nloptr_2.0.3        vctrs_0.4.2         tzdb_0.3.0         
+## [73] cellranger_1.1.0    gtable_0.3.1        getopt_1.20.3       assertthat_0.2.1    cachem_1.0.6        xfun_0.33          
+## [79] broom_1.0.1         googledrive_2.0.0   pcaPP_2.0-3         gargle_1.2.1        lmerTest_3.1-3      ellipsis_0.3.2</code></pre>
+</div>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
