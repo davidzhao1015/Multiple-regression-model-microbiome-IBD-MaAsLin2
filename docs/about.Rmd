@@ -6,7 +6,7 @@ date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
 
 ```{css, echo=FALSE}
 h1, h2 {color: #0074B7;} 
-body {color: black; font-family: Arial;} 
+body {color: black; font-family: Arial; font-size: 16px;} 
 ```
 
 ```{r setup, include = FALSE}
