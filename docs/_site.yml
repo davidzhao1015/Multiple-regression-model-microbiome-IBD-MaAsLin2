@@ -19,7 +19,7 @@ navbar:
         - text: "Heading 2"
 output:
   html_document:
-    theme: cosmo
+    theme: spacelab
     highlight: tango
     df_print: paged
     toc: TRUE
