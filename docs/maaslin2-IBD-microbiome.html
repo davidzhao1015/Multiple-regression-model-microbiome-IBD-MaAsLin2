@@ -9,9 +9,10 @@
 <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
+<meta name="author" content="David Xin Zhao" />
 
 
-<title>Multivariate model</title>
+<title>Multiple regression of microbiome and IBD-related variables using HMP datasets</title>
 
 <script src="site_libs/header-attrs-2.18/header-attrs.js"></script>
 <script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
@@ -454,7 +455,10 @@ div.tocify {
 
 
 
-<h1 class="title toc-ignore">Multivariate model</h1>
+<h1 class="title toc-ignore">Multiple regression of microbiome and
+IBD-related variables using HMP datasets</h1>
+<h4 class="author">David Xin Zhao</h4>
+<h4 class="date">Last edited 25 November 2022</h4>
 
 </div>
 
@@ -890,7 +894,7 @@ Parabacteroides.distasonis
 <span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_brewer</span>(<span class="at">palette =</span> <span class="st">&quot;Dark2&quot;</span>)<span class="sc">+</span></span>
 <span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="about_files/figure-html/plot-1.png" alt="Relationship between representative top genus and diagnosis" width="576" />
+<img src="maaslin2-IBD-microbiome_files/figure-html/plot-1.png" alt="Relationship between representative top genus and diagnosis" width="576" />
 <p class="caption">
 Relationship between representative top genus and diagnosis
 </p>
@@ -945,78 +949,77 @@ categorical variables from <code>df_input_metadata</code>.</p>
 <span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>diagnosis) <span class="sc">%&gt;%</span> </span>
 <span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>()</span>
 <span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>sum_cat <span class="ot">&lt;-</span> <span class="fu">lapply</span>(cat_cov, count_pct) <span class="co">#list of summary of multiple categorical variables  </span></span></code></pre></div>
-<pre><code>## Warning: Use of .data in tidyselect expressions was deprecated in tidyselect 1.2.0.
-## ℹ Please use `all_of(var)` (or `any_of(var)`) instead of `.data[[var]]`</code></pre>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># combine each element of the list by rows before storing in a data frame </span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>df_sum_cat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">do.call</span>(rbind, sum_cat))</span></code></pre></div>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(df_input_metadata)</span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>numerical_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>dat_ns <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span> </span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(diagnosis) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>),</span>
-<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">std =</span> <span class="fu">round</span>(<span class="fu">sd</span>(.data[[x]], <span class="at">na.rm =</span> T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>average)</span>
-<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>df_num_sub <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span> </span>
-<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(diagnosis) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_ns</span>(<span class="at">ns =</span> dat_ns)<span class="sc">%&gt;%</span> </span>
-<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">&quot;average (sd)&quot;</span><span class="ot">=</span> average) <span class="sc">%&gt;%</span></span>
-<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(<span class="at">key=</span>diagnosis, <span class="at">value =</span> <span class="st">&quot;average (sd)&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">covariable =</span> x) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(covariable, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span>
-<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a>total_dat_ns <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span></span>
-<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>),</span>
-<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>            <span class="at">std =</span> <span class="fu">round</span>(<span class="fu">sd</span>(.data[[x]], <span class="at">na.rm =</span> T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>average) <span class="sc">%&gt;%</span></span>
-<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">covariable =</span> x) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(covariable, std)</span>
-<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>df_num <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span></span>
-<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
-<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">covariable =</span> x) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(covariable, average) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_ns</span>(<span class="at">ns =</span> total_dat_ns) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">&quot;average (sd)&quot;</span> <span class="ot">=</span> average)</span>
-<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-34"><a href="#cb15-34" aria-hidden="true" tabindex="-1"></a>df_num_bind <span class="ot">&lt;-</span> <span class="fu">cbind</span>(df_num_sub, df_num[,<span class="dv">2</span>]) </span>
-<span id="cb15-35"><a href="#cb15-35" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-36"><a href="#cb15-36" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df_num_bind)[<span class="dv">5</span>] <span class="ot">&lt;-</span> <span class="st">&quot;overall&quot;</span></span>
-<span id="cb15-37"><a href="#cb15-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-38"><a href="#cb15-38" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(df_num_bind) </span>
-<span id="cb15-39"><a href="#cb15-39" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb15-40"><a href="#cb15-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb15-41"><a href="#cb15-41" aria-hidden="true" tabindex="-1"></a><span class="fu">numerical_summary</span>(<span class="st">&quot;age&quot;</span>) <span class="co">#the resulting function works properly</span></span></code></pre></div>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>sum_cat <span class="ot">&lt;-</span> <span class="fu">lapply</span>(cat_cov, count_pct) <span class="co">#list of summary of multiple categorical variables  </span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co"># combine each element of the list by rows before storing in a data frame </span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>df_sum_cat <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">do.call</span>(rbind, sum_cat))</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(df_input_metadata)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>numerical_summary <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>dat_ns <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(diagnosis) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>),</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">std =</span> <span class="fu">round</span>(<span class="fu">sd</span>(.data[[x]], <span class="at">na.rm =</span> T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>average)</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>df_num_sub <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(diagnosis) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_ns</span>(<span class="at">ns =</span> dat_ns)<span class="sc">%&gt;%</span> </span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">&quot;average (sd)&quot;</span><span class="ot">=</span> average) <span class="sc">%&gt;%</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">spread</span>(<span class="at">key=</span>diagnosis, <span class="at">value =</span> <span class="st">&quot;average (sd)&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">covariable =</span> x) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(covariable, <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>)</span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>total_dat_ns <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span></span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>),</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>            <span class="at">std =</span> <span class="fu">round</span>(<span class="fu">sd</span>(.data[[x]], <span class="at">na.rm =</span> T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>average) <span class="sc">%&gt;%</span></span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">covariable =</span> x) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(covariable, std)</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>df_num <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span></span>
+<span id="cb13-28"><a href="#cb13-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">average =</span> <span class="fu">round</span>(<span class="fu">mean</span>(.data[[x]], <span class="at">na.rm=</span>T),<span class="dv">2</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb13-29"><a href="#cb13-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">covariable =</span> x) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-30"><a href="#cb13-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(covariable, average) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-31"><a href="#cb13-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">adorn_ns</span>(<span class="at">ns =</span> total_dat_ns) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-32"><a href="#cb13-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">&quot;average (sd)&quot;</span> <span class="ot">=</span> average)</span>
+<span id="cb13-33"><a href="#cb13-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-34"><a href="#cb13-34" aria-hidden="true" tabindex="-1"></a>df_num_bind <span class="ot">&lt;-</span> <span class="fu">cbind</span>(df_num_sub, df_num[,<span class="dv">2</span>]) </span>
+<span id="cb13-35"><a href="#cb13-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-36"><a href="#cb13-36" aria-hidden="true" tabindex="-1"></a><span class="fu">colnames</span>(df_num_bind)[<span class="dv">5</span>] <span class="ot">&lt;-</span> <span class="st">&quot;overall&quot;</span></span>
+<span id="cb13-37"><a href="#cb13-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-38"><a href="#cb13-38" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(df_num_bind) </span>
+<span id="cb13-39"><a href="#cb13-39" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb13-40"><a href="#cb13-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-41"><a href="#cb13-41" aria-hidden="true" tabindex="-1"></a><span class="fu">numerical_summary</span>(<span class="st">&quot;age&quot;</span>) <span class="co">#the resulting function works properly</span></span></code></pre></div>
 <p>Apply the function <code>numerical_summary</code> to all the
 numerical variables in meta-data with <code>lapply</code>.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># extract column names for all the numerical variables in meta-data </span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>num_names <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span> </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>()</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>list_num_summary <span class="ot">&lt;-</span> <span class="fu">lapply</span>(num_names, numerical_summary) </span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="co"># str(list_num_summary) </span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a><span class="co"># convert individual element of the list to data frames and bind them into a single data frame </span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>df_num_summary <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">do.call</span>(rbind, list_num_summary)) </span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># extract column names for all the numerical variables in meta-data </span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>num_names <span class="ot">&lt;-</span> df_input_metadata <span class="sc">%&gt;%</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">%&gt;%</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">colnames</span>()</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>list_num_summary <span class="ot">&lt;-</span> <span class="fu">lapply</span>(num_names, numerical_summary) </span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co"># str(list_num_summary) </span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="co"># convert individual element of the list to data frames and bind them into a single data frame </span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>df_num_summary <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(<span class="fu">do.call</span>(rbind, list_num_summary)) </span></code></pre></div>
 <p>Combine descriptive stats tables, <code>df_sum_cat</code> and
 <code>df_num_summary</code> for categorical and numerical covariables,
 respectively</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># head(df_sum_cat, 3)</span></span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="co"># head(df_num_summary, 3)</span></span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df_sum_cat)[<span class="dv">5</span>] <span class="ot">&lt;-</span> <span class="st">&quot;overall&quot;</span>  <span class="co">#rename the column name</span></span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>df_all_cov <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(df_sum_cat, df_num_summary) <span class="co">#bind by rows </span></span>
-<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a><span class="co">#replace NA in the column, &quot;co variable&quot; with &quot; unknown&quot;</span></span>
-<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>df_all_cov<span class="sc">$</span>covariable <span class="ot">&lt;-</span> <span class="fu">as.character</span>(df_all_cov<span class="sc">$</span>covariable)</span>
-<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>df_all_cov<span class="sc">$</span>covariable <span class="sc">%&gt;%</span> <span class="fu">replace_na</span>(<span class="st">&quot;unknown&quot;</span>)  </span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># head(df_sum_cat, 3)</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a><span class="co"># head(df_num_summary, 3)</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(df_sum_cat)[<span class="dv">5</span>] <span class="ot">&lt;-</span> <span class="st">&quot;overall&quot;</span>  <span class="co">#rename the column name</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>df_all_cov <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(df_sum_cat, df_num_summary) <span class="co">#bind by rows </span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="co">#replace NA in the column, &quot;co variable&quot; with &quot; unknown&quot;</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>df_all_cov<span class="sc">$</span>covariable <span class="ot">&lt;-</span> <span class="fu">as.character</span>(df_all_cov<span class="sc">$</span>covariable)</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>df_all_cov<span class="sc">$</span>covariable <span class="sc">%&gt;%</span> <span class="fu">replace_na</span>(<span class="st">&quot;unknown&quot;</span>)  </span></code></pre></div>
 <pre><code>##  [1] &quot;site&quot;             &quot;Cedars-Sinai&quot;     &quot;Cincinnati&quot;       &quot;Emory&quot;            &quot;MGH&quot;              &quot;MGH Pediatrics&quot;  
 ##  [7] &quot;antibiotics&quot;      &quot;No&quot;               &quot;Yes&quot;              &quot;dysbiosis_binary&quot; &quot;No&quot;               &quot;Yes&quot;             
 ## [13] &quot;dysbiosisnonIBD&quot;  &quot;No&quot;               &quot;Yes&quot;              &quot;unknown&quot;          &quot;dysbiosisUC&quot;      &quot;No&quot;              
@@ -1024,64 +1027,64 @@ respectively</p>
 ## [25] &quot;age&quot;              &quot;dysbiosis&quot;        &quot;collection&quot;</code></pre>
 <p>Apply chi-square test and ANOVA to categorical descriptive stats and
 numerical descriptive stats, respectively</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write a function to do chi-square to categorical variables </span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>chi_square <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  chisq <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(df_input_metadata[[x]], df_input_metadata<span class="sc">$</span>diagnosis)</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  pval <span class="ot">&lt;-</span> chisq<span class="sc">$</span>p.value</span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  pval_digit <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(pval, <span class="dv">3</span>), <span class="at">nsmall=</span><span class="dv">4</span>)</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(pval_digit)</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a><span class="co"># chi_square(&quot;site&quot;)</span></span>
-<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>df_pval_cat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">covariable =</span> cat_cov, </span>
-<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pvalue =</span> <span class="fu">numeric</span>(<span class="at">length =</span> <span class="fu">length</span>(cat_cov)))   <span class="co">#create empty df to store p-values </span></span>
-<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>df_pval_cat<span class="sc">$</span>pvalue <span class="ot">&lt;-</span> <span class="fu">sapply</span>(cat_cov, chi_square) </span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co"># write a function to do chi-square to categorical variables </span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>chi_square <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  chisq <span class="ot">&lt;-</span> <span class="fu">chisq.test</span>(df_input_metadata[[x]], df_input_metadata<span class="sc">$</span>diagnosis)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  pval <span class="ot">&lt;-</span> chisq<span class="sc">$</span>p.value</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  pval_digit <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(pval, <span class="dv">3</span>), <span class="at">nsmall=</span><span class="dv">4</span>)</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(pval_digit)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="co"># chi_square(&quot;site&quot;)</span></span>
+<span id="cb17-14"><a href="#cb17-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-15"><a href="#cb17-15" aria-hidden="true" tabindex="-1"></a>df_pval_cat <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">covariable =</span> cat_cov, </span>
+<span id="cb17-16"><a href="#cb17-16" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pvalue =</span> <span class="fu">numeric</span>(<span class="at">length =</span> <span class="fu">length</span>(cat_cov)))   <span class="co">#create empty df to store p-values </span></span>
+<span id="cb17-17"><a href="#cb17-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-18"><a href="#cb17-18" aria-hidden="true" tabindex="-1"></a>df_pval_cat<span class="sc">$</span>pvalue <span class="ot">&lt;-</span> <span class="fu">sapply</span>(cat_cov, chi_square) </span></code></pre></div>
 <pre><code>## [1] &quot;0.0000&quot;
 ## [1] &quot;0.0000&quot;
 ## [1] &quot;0.0000&quot;
 ## [1] &quot;0.0000&quot;
 ## [1] &quot;0.0000&quot;
 ## [1] &quot;0.0000&quot;</code></pre>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#write a function to do anova to numerical variables against diagnosis </span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>anova_num <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">paste0</span>(x, <span class="st">&quot;~&quot;</span>, <span class="st">&quot;diagnosis&quot;</span>)</span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  pval <span class="ot">&lt;-</span> <span class="fu">anova</span>(<span class="fu">lm</span>(f, <span class="at">data=</span>df_input_metadata))<span class="sc">$</span><span class="st">&quot;Pr(&gt;F)&quot;</span>[<span class="dv">1</span>]</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  pval_digit <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(pval, <span class="dv">3</span>), <span class="at">nsmall=</span><span class="dv">5</span>)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(pval_digit)</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>df_pval_num <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">covariable =</span> num_names, </span>
-<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pvalue =</span> <span class="fu">numeric</span>(<span class="at">length =</span> <span class="fu">length</span>(num_names)))   <span class="co">#create empty df to store p-values </span></span>
-<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a>df_pval_num<span class="sc">$</span>pvalue <span class="ot">&lt;-</span> <span class="fu">sapply</span>(num_names, anova_num) </span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">#write a function to do anova to numerical variables against diagnosis </span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>anova_num <span class="ot">&lt;-</span> <span class="cf">function</span>(x){</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  f <span class="ot">&lt;-</span> <span class="fu">paste0</span>(x, <span class="st">&quot;~&quot;</span>, <span class="st">&quot;diagnosis&quot;</span>)</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  pval <span class="ot">&lt;-</span> <span class="fu">anova</span>(<span class="fu">lm</span>(f, <span class="at">data=</span>df_input_metadata))<span class="sc">$</span><span class="st">&quot;Pr(&gt;F)&quot;</span>[<span class="dv">1</span>]</span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>  pval_digit <span class="ot">&lt;-</span> <span class="fu">format</span>(<span class="fu">round</span>(pval, <span class="dv">3</span>), <span class="at">nsmall=</span><span class="dv">5</span>)</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(pval_digit)</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>df_pval_num <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">covariable =</span> num_names, </span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>                          <span class="at">pvalue =</span> <span class="fu">numeric</span>(<span class="at">length =</span> <span class="fu">length</span>(num_names)))   <span class="co">#create empty df to store p-values </span></span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>df_pval_num<span class="sc">$</span>pvalue <span class="ot">&lt;-</span> <span class="fu">sapply</span>(num_names, anova_num) </span></code></pre></div>
 <pre><code>## [1] &quot;0.00000&quot;
 ## [1] &quot;0.00000&quot;
 ## [1] &quot;0.61700&quot;</code></pre>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co">#join p-values with descriptive stats table </span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval <span class="ot">&lt;-</span> df_all_cov <span class="sc">%&gt;%</span> </span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(df_pval_num, <span class="at">by=</span><span class="st">&quot;covariable&quot;</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(df_pval_cat, <span class="at">by=</span><span class="st">&quot;covariable&quot;</span>)  </span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval<span class="sc">$</span>pvalue.x <span class="ot">&lt;-</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(df_all_cov_pval<span class="sc">$</span>pvalue.x), </span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>                            df_all_cov_pval<span class="sc">$</span>pvalue.x,</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>                            df_all_cov_pval<span class="sc">$</span>pvalue.y)  </span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval<span class="sc">$</span>covariable <span class="ot">&lt;-</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(df_all_cov_pval<span class="sc">$</span>covariable), </span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>                            df_all_cov_pval<span class="sc">$</span>covariable,</span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>                            <span class="st">&quot;unknown&quot;</span>)  </span>
-<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval2 <span class="ot">&lt;-</span> df_all_cov_pval <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>pvalue.y) <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">pvalue =</span> pvalue.x) </span>
-<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval2 <span class="co">#view the resulting table</span></span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="co">#join p-values with descriptive stats table </span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval <span class="ot">&lt;-</span> df_all_cov <span class="sc">%&gt;%</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(df_pval_num, <span class="at">by=</span><span class="st">&quot;covariable&quot;</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(df_pval_cat, <span class="at">by=</span><span class="st">&quot;covariable&quot;</span>)  </span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval<span class="sc">$</span>pvalue.x <span class="ot">&lt;-</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(df_all_cov_pval<span class="sc">$</span>pvalue.x), </span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>                            df_all_cov_pval<span class="sc">$</span>pvalue.x,</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>                            df_all_cov_pval<span class="sc">$</span>pvalue.y)  </span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval<span class="sc">$</span>covariable <span class="ot">&lt;-</span> <span class="fu">if_else</span>(<span class="sc">!</span><span class="fu">is.na</span>(df_all_cov_pval<span class="sc">$</span>covariable), </span>
+<span id="cb21-11"><a href="#cb21-11" aria-hidden="true" tabindex="-1"></a>                            df_all_cov_pval<span class="sc">$</span>covariable,</span>
+<span id="cb21-12"><a href="#cb21-12" aria-hidden="true" tabindex="-1"></a>                            <span class="st">&quot;unknown&quot;</span>)  </span>
+<span id="cb21-13"><a href="#cb21-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-14"><a href="#cb21-14" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval2 <span class="ot">&lt;-</span> df_all_cov_pval <span class="sc">%&gt;%</span> <span class="fu">select</span>(<span class="sc">-</span>pvalue.y) <span class="sc">%&gt;%</span> <span class="fu">rename</span>(<span class="at">pvalue =</span> pvalue.x) </span>
+<span id="cb21-15"><a href="#cb21-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-16"><a href="#cb21-16" aria-hidden="true" tabindex="-1"></a>df_all_cov_pval2 <span class="co">#view the resulting table</span></span></code></pre></div>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["covariable"],"name":[1],"type":["chr"],"align":["left"]},{"label":["nonIBD"],"name":[2],"type":["chr"],"align":["left"]},{"label":["UC"],"name":[3],"type":["chr"],"align":["left"]},{"label":["CD"],"name":[4],"type":["chr"],"align":["left"]},{"label":["overall"],"name":[5],"type":["chr"],"align":["left"]},{"label":["pvalue"],"name":[6],"type":["chr"],"align":["left"]}],"data":[{"1":"site","2":"NA","3":"NA","4":"NA","5":"NA","6":"0.0000"},{"1":"Cedars-Sinai","2":"5%  (21)","3":"40% (164)","4":"55% (222)","5":"100%  (407)","6":"NA"},{"1":"Cincinnati","2":"34% (157)","3":"20%  (94)","4":"46% (211)","5":"100%  (462)","6":"NA"},{"1":"Emory","2":"8%   (5)","3":"25%  (16)","4":"67%  (42)","5":"100%   (63)","6":"NA"},{"1":"MGH","2":"45% (198)","3":"23% (100)","4":"33% (146)","5":"100%  (444)","6":"NA"},{"1":"MGH Pediatrics","2":"21%  (45)","3":"29%  (63)","4":"51% (111)","5":"100%  (219)","6":"NA"},{"1":"antibiotics","2":"NA","3":"NA","4":"NA","5":"NA","6":"0.0000"},{"1":"No","2":"29% (410)","3":"29% (414)","4":"43% (613)","5":"100% (1437)","6":"NA"},{"1":"Yes","2":"10%  (16)","3":"15%  (23)","4":"75% (119)","5":"100%  (158)","6":"NA"},{"1":"dysbiosis_binary","2":"NA","3":"NA","4":"NA","5":"NA","6":"0.0000"},{"1":"No","2":"29% (383)","3":"29% (386)","4":"42% (554)","5":"100% (1323)","6":"NA"},{"1":"Yes","2":"16%  (43)","3":"19%  (51)","4":"65% (178)","5":"100%  (272)","6":"NA"},{"1":"dysbiosisnonIBD","2":"NA","3":"NA","4":"NA","5":"NA","6":"0.0000"},{"1":"No","2":"25% (383)","3":"28% (436)","4":"47% (714)","5":"100% (1533)","6":"NA"},{"1":"Yes","2":"100%  (43)","3":"0%   (0)","4":"0%   (0)","5":"100%   (43)","6":"NA"},{"1":"unknown","2":"0%   (0)","3":"5%   (1)","4":"95%  (18)","5":"100%   (19)","6":"NA"},{"1":"dysbiosisUC","2":"NA","3":"NA","4":"NA","5":"NA","6":"0.0000"},{"1":"No","2":"28% (426)","3":"25% (386)","4":"47% (714)","5":"100% (1526)","6":"NA"},{"1":"Yes","2":"0%   (0)","3":"100%  (50)","4":"0%   (0)","5":"100%   (50)","6":"NA"},{"1":"unknown","2":"0%   (0)","3":"5%   (1)","4":"95%  (18)","5":"100%   (19)","6":"NA"},{"1":"dysbiosisCD","2":"NA","3":"NA","4":"NA","5":"NA","6":"0.0000"},{"1":"No","2":"30% (426)","3":"31% (436)","4":"38% (539)","5":"100% (1401)","6":"NA"},{"1":"Yes","2":"0%   (0)","3":"0%   (0)","4":"100% (175)","5":"100%  (175)","6":"NA"},{"1":"unknown","2":"0%   (0)","3":"5%   (1)","4":"95%  (18)","5":"100%   (19)","6":"NA"},{"1":"age","2":"29.12 (19.96)","3":"29.83 (18.28)","4":"25.71  (16.3)","5":"27.77 (17.99)","6":"0.00000"},{"1":"dysbiosis","2":"0.74 (0.07)","3":"0.75 (0.07)","4":"0.78  (0.1)","5":"0.76 (0.09)","6":"0.00000"},{"1":"collection","2":"11.00 (6.78)","3":"10.59 (6.59)","4":"10.92  (6.7)","5":"10.85 (6.69)","6":"0.61700"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
@@ -1109,68 +1112,68 @@ variables <code>fixed_effects</code> =
 <p>Note that MaAsLin2 can not yet handle interaction terms directly in
 model building. Alternatively, persons can add additional interactive
 covariables in the input data frame prior to modeling.</p>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>fit_data2 <span class="ot">&lt;-</span> <span class="fu">Maaslin2</span>(</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">input_data =</span> df_input_data,</span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">input_metadata =</span> df_input_metadata,</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">min_prevalence =</span> <span class="fl">0.1</span>, <span class="co">#typical prevalence threshold: 10-50% (up to 70-90% can be reasonable)</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">min_abundance =</span> <span class="fl">0.0001</span>, <span class="co">#typical relative abundance threshold: 0.0001 </span></span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">normalization =</span> <span class="st">&quot;NONE&quot;</span>,  <span class="co">#without additional normalization  </span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">output =</span> <span class="st">&quot;demo_output2&quot;</span>,</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">max_significance =</span> <span class="fl">0.1</span>,</span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot_heatmap =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot_scatter =</span> <span class="cn">FALSE</span>,</span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">analysis_method =</span> <span class="st">&quot;LM&quot;</span>,  <span class="co">#linear regression model </span></span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">fixed_effects =</span> <span class="fu">c</span>(<span class="st">&quot;diagnosis&quot;</span>, <span class="st">&quot;dysbiosis&quot;</span>), <span class="co"># fixed effect variables, diagnosis and dysbiosis </span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">random_effects =</span> <span class="fu">c</span>(<span class="st">&quot;subject&quot;</span>), <span class="co"># random effect variable  </span></span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">reference =</span> <span class="fu">c</span>(<span class="st">&quot;diagnosis,nonIBD&quot;</span>)) <span class="co">#set the baseline for the categorical variable, diagnosis </span></span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a>all_results <span class="ot">&lt;-</span> fit_data2<span class="sc">$</span>results <span class="co">#extract coefficients and q-value</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fit_data2 <span class="ot">&lt;-</span> <span class="fu">Maaslin2</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">input_data =</span> df_input_data,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">input_metadata =</span> df_input_metadata,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">min_prevalence =</span> <span class="fl">0.1</span>, <span class="co">#typical prevalence threshold: 10-50% (up to 70-90% can be reasonable)</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>        <span class="at">min_abundance =</span> <span class="fl">0.0001</span>, <span class="co">#typical relative abundance threshold: 0.0001 </span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">normalization =</span> <span class="st">&quot;NONE&quot;</span>,  <span class="co">#without additional normalization  </span></span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">output =</span> <span class="st">&quot;demo_output2&quot;</span>,</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>        <span class="at">max_significance =</span> <span class="fl">0.1</span>,</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot_heatmap =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>        <span class="at">plot_scatter =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>        <span class="at">analysis_method =</span> <span class="st">&quot;LM&quot;</span>,  <span class="co">#linear regression model </span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>        <span class="at">fixed_effects =</span> <span class="fu">c</span>(<span class="st">&quot;diagnosis&quot;</span>, <span class="st">&quot;dysbiosis&quot;</span>), <span class="co"># fixed effect variables, diagnosis and dysbiosis </span></span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">random_effects =</span> <span class="fu">c</span>(<span class="st">&quot;subject&quot;</span>), <span class="co"># random effect variable  </span></span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>        <span class="at">reference =</span> <span class="fu">c</span>(<span class="st">&quot;diagnosis,nonIBD&quot;</span>)) <span class="co">#set the baseline for the categorical variable, diagnosis </span></span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>all_results <span class="ot">&lt;-</span> fit_data2<span class="sc">$</span>results <span class="co">#extract coefficients and q-value</span></span></code></pre></div>
 <div id="significant-taxa-checkup" class="section level2" number="2.1">
 <h2><span class="header-section-number">2.1</span> Significant taxa
 checkup</h2>
 <p>significant associations is provided in
 <code>significant_results.tsv</code></p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>sig_results <span class="ot">&lt;-</span> all_results <span class="sc">%&gt;%</span> </span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(qval <span class="sc">&lt;=</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span> <span class="co">#sig threshold q value = 0.05 </span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">arrange</span>(qval)</span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>sig_results  <span class="co"># print in the paged table format </span></span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>sig_results <span class="ot">&lt;-</span> all_results <span class="sc">%&gt;%</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(qval <span class="sc">&lt;=</span> <span class="fl">0.05</span>) <span class="sc">%&gt;%</span> <span class="co">#sig threshold q value = 0.05 </span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">arrange</span>(qval)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>sig_results  <span class="co"># print in the paged table format </span></span></code></pre></div>
 <div data-pagedtable="false">
 <script data-pagedtable-source type="application/json">
 {"columns":[{"label":["feature"],"name":[1],"type":["chr"],"align":["left"]},{"label":["metadata"],"name":[2],"type":["chr"],"align":["left"]},{"label":["value"],"name":[3],"type":["chr"],"align":["left"]},{"label":["coef"],"name":[4],"type":["dbl"],"align":["right"]},{"label":["stderr"],"name":[5],"type":["dbl"],"align":["right"]},{"label":["pval"],"name":[6],"type":["dbl"],"align":["right"]},{"label":["name"],"name":[7],"type":["chr"],"align":["left"]},{"label":["qval"],"name":[8],"type":["dbl"],"align":["right"]},{"label":["N"],"name":[9],"type":["int"],"align":["right"]},{"label":["N.not.zero"],"name":[10],"type":["int"],"align":["right"]}],"data":[{"1":"Faecalibacterium.prausnitzii","2":"dysbiosis","3":"dysbiosis","4":"-2.6011472","5":"0.08354458","6":"1.817890e-165","7":"dysbiosis","8":"4.581083e-163","9":"1595","10":"1534"},{"1":"Subdoligranulum.unclassified","2":"dysbiosis","3":"dysbiosis","4":"-1.4570705","5":"0.07092002","6":"3.596769e-83","7":"dysbiosis","8":"4.531929e-81","9":"1595","10":"1546"},{"1":"Bacteroides.uniformis","2":"dysbiosis","3":"dysbiosis","4":"-2.1662652","5":"0.11352360","6":"2.940839e-73","7":"dysbiosis","8":"2.470305e-71","9":"1595","10":"1391"},{"1":"Eubacterium.rectale","2":"dysbiosis","3":"dysbiosis","4":"-2.4477468","5":"0.13298192","6":"1.100929e-68","7":"dysbiosis","8":"6.935850e-67","9":"1595","10":"1318"},{"1":"Ruminococcus.obeum","2":"dysbiosis","3":"dysbiosis","4":"-1.5238531","5":"0.09744731","6":"3.268299e-51","7":"dysbiosis","8":"1.647223e-49","9":"1595","10":"1346"},{"1":"Alistipes.putredinis","2":"dysbiosis","3":"dysbiosis","4":"-2.0041024","5":"0.13020836","6":"6.495960e-50","7":"dysbiosis","8":"2.728303e-48","9":"1595","10":"940"},{"1":"Bacteroides.vulgatus","2":"dysbiosis","3":"dysbiosis","4":"-1.5428680","5":"0.10038171","6":"9.090160e-50","7":"dysbiosis","8":"3.272458e-48","9":"1595","10":"1455"},{"1":"Alistipes.shahii","2":"dysbiosis","3":"dysbiosis","4":"-1.5599548","5":"0.10353085","6":"5.215580e-48","7":"dysbiosis","8":"1.642908e-46","9":"1595","10":"757"},{"1":"Coprococcus.comes","2":"dysbiosis","3":"dysbiosis","4":"-1.3888742","5":"0.09977186","6":"1.185529e-41","7":"dysbiosis","8":"3.319480e-40","9":"1595","10":"848"},{"1":"Eubacterium.eligens","2":"dysbiosis","3":"dysbiosis","4":"-1.8804274","5":"0.13630211","6":"5.628795e-41","7":"dysbiosis","8":"1.418456e-39","9":"1595","10":"1015"},{"1":"Eubacterium.ventriosum","2":"dysbiosis","3":"dysbiosis","4":"-1.4871462","5":"0.11023766","6":"2.395633e-39","7":"dysbiosis","8":"5.488177e-38","9":"1595","10":"627"},{"1":"Bacteroides.ovatus","2":"dysbiosis","3":"dysbiosis","4":"-1.3610466","5":"0.10247943","6":"3.137055e-38","7":"dysbiosis","8":"6.587815e-37","9":"1595","10":"1319"},{"1":"Alistipes.onderdonkii","2":"dysbiosis","3":"dysbiosis","4":"-1.4839959","5":"0.11403005","6":"7.699057e-37","7":"dysbiosis","8":"1.492433e-35","9":"1595","10":"896"},{"1":"Odoribacter.splanchnicus","2":"dysbiosis","3":"dysbiosis","4":"-0.5530159","5":"0.04273146","6":"1.710236e-36","7":"dysbiosis","8":"3.078425e-35","9":"1595","10":"662"},{"1":"Dorea.longicatena","2":"dysbiosis","3":"dysbiosis","4":"-1.3892026","5":"0.10815140","6":"5.301340e-36","7":"dysbiosis","8":"8.906251e-35","9":"1595","10":"1063"},{"1":"Oscillibacter.unclassified","2":"dysbiosis","3":"dysbiosis","4":"-1.6929277","5":"0.13330118","6":"4.890734e-35","7":"dysbiosis","8":"7.702905e-34","9":"1595","10":"1296"},{"1":"Roseburia.inulinivorans","2":"dysbiosis","3":"dysbiosis","4":"-1.7229854","5":"0.14234059","6":"3.008344e-32","7":"dysbiosis","8":"4.459428e-31","9":"1595","10":"1074"},{"1":"Clostridium.leptum","2":"dysbiosis","3":"dysbiosis","4":"-1.3460861","5":"0.11295813","6":"2.087420e-31","7":"dysbiosis","8":"2.922388e-30","9":"1595","10":"812"},{"1":"Lachnospiraceae.bacterium.3.1.46FAA","2":"dysbiosis","3":"dysbiosis","4":"-1.2688707","5":"0.10749048","6":"6.915089e-31","7":"dysbiosis","8":"9.171592e-30","9":"1595","10":"992"},{"1":"Parabacteroides.merdae","2":"dysbiosis","3":"dysbiosis","4":"-1.2160530","5":"0.10409641","6":"2.821779e-30","7":"dysbiosis","8":"3.555442e-29","9":"1595","10":"911"},{"1":"Bacteroides.caccae","2":"dysbiosis","3":"dysbiosis","4":"-1.2559018","5":"0.11134842","6":"2.069784e-28","7":"dysbiosis","8":"2.391922e-27","9":"1595","10":"1072"},{"1":"Roseburia.hominis","2":"dysbiosis","3":"dysbiosis","4":"-1.7722118","5":"0.15698298","6":"2.088186e-28","7":"dysbiosis","8":"2.391922e-27","9":"1595","10":"1061"},{"1":"Bilophila.unclassified","2":"dysbiosis","3":"dysbiosis","4":"-1.1358835","5":"0.10111122","6":"3.126052e-28","7":"dysbiosis","8":"3.425066e-27","9":"1595","10":"885"},{"1":"Collinsella.aerofaciens","2":"dysbiosis","3":"dysbiosis","4":"-1.1011637","5":"0.09893962","6":"9.253328e-28","7":"dysbiosis","8":"9.715995e-27","9":"1595","10":"835"},{"1":"Alistipes.finegoldii","2":"dysbiosis","3":"dysbiosis","4":"-0.9409091","5":"0.08628022","6":"9.831942e-27","7":"dysbiosis","8":"9.910598e-26","9":"1595","10":"788"},{"1":"Eubacterium.siraeum","2":"dysbiosis","3":"dysbiosis","4":"-1.4619478","5":"0.13696694","6":"9.809497e-26","7":"dysbiosis","8":"9.507667e-25","9":"1595","10":"656"},{"1":"Bacteroides.xylanisolvens","2":"dysbiosis","3":"dysbiosis","4":"-1.1185394","5":"0.10700537","6":"8.874247e-25","7":"dysbiosis","8":"8.282630e-24","9":"1595","10":"1072"},{"1":"Parabacteroides.distasonis","2":"dysbiosis","3":"dysbiosis","4":"-1.2314709","5":"0.12086227","6":"1.177432e-23","7":"dysbiosis","8":"1.059689e-22","9":"1595","10":"935"},{"1":"Bacteroidales.bacterium.ph8","2":"dysbiosis","3":"dysbiosis","4":"-0.8823028","5":"0.08957245","6":"2.978142e-22","7":"dysbiosis","8":"2.587903e-21","9":"1595","10":"472"},{"1":"Bacteroides.thetaiotaomicron","2":"dysbiosis","3":"dysbiosis","4":"-1.0526770","5":"0.11123531","6":"1.056638e-20","7":"dysbiosis","8":"8.875760e-20","9":"1595","10":"1121"},{"1":"Eubacterium.hallii","2":"dysbiosis","3":"dysbiosis","4":"-1.1356133","5":"0.12189947","6":"4.098493e-20","7":"dysbiosis","8":"3.331678e-19","9":"1595","10":"923"},{"1":"Barnesiella.intestinihominis","2":"dysbiosis","3":"dysbiosis","4":"-0.7394744","5":"0.08007195","6":"8.371712e-20","7":"dysbiosis","8":"6.592723e-19","9":"1595","10":"484"},{"1":"Klebsiella.pneumoniae","2":"dysbiosis","3":"dysbiosis","4":"0.8130915","5":"0.09488803","6":"4.741206e-17","7":"dysbiosis","8":"3.620557e-16","9":"1595","10":"171"},{"1":"Ruminococcus.torques","2":"dysbiosis","3":"dysbiosis","4":"-0.5958061","5":"0.07036518","6":"6.171992e-17","7":"dysbiosis","8":"4.574535e-16","9":"1595","10":"1514"},{"1":"Ruminococcus.bromii","2":"dysbiosis","3":"dysbiosis","4":"-1.0361481","5":"0.12567934","6":"3.435980e-16","7":"dysbiosis","8":"2.473905e-15","9":"1595","10":"512"},{"1":"Bacteroides.stercoris","2":"dysbiosis","3":"dysbiosis","4":"-1.0771879","5":"0.13644892","6":"5.467638e-15","7":"dysbiosis","8":"3.827347e-14","9":"1595","10":"1063"},{"1":"Bacteroides.dorei","2":"dysbiosis","3":"dysbiosis","4":"-0.9347843","5":"0.12114858","6":"2.126226e-14","7":"dysbiosis","8":"1.448132e-13","9":"1595","10":"1048"},{"1":"Roseburia.intestinalis","2":"dysbiosis","3":"dysbiosis","4":"-1.3590403","5":"0.17818682","6":"4.183818e-14","7":"dysbiosis","8":"2.774532e-13","9":"1595","10":"1001"},{"1":"Bacteroides.eggerthii","2":"dysbiosis","3":"dysbiosis","4":"-0.6373797","5":"0.08590196","6":"1.924022e-13","7":"dysbiosis","8":"1.243214e-12","9":"1595","10":"309"},{"1":"Dialister.invisus","2":"dysbiosis","3":"dysbiosis","4":"-0.8256632","5":"0.11352333","6":"5.518587e-13","7":"dysbiosis","8":"3.476710e-12","9":"1595","10":"777"},{"1":"Bacteroides.finegoldii","2":"dysbiosis","3":"dysbiosis","4":"-0.6152847","5":"0.09058887","6":"1.573953e-11","7":"dysbiosis","8":"9.674051e-11","9":"1595","10":"400"},{"1":"Bacteroides.cellulosilyticus","2":"dysbiosis","3":"dysbiosis","4":"-0.5958650","5":"0.08927904","6":"3.458233e-11","7":"dysbiosis","8":"2.074940e-10","9":"1595","10":"526"},{"1":"Bifidobacterium.bifidum","2":"dysbiosis","3":"dysbiosis","4":"-0.5720200","5":"0.08789327","6":"1.017792e-10","7":"dysbiosis","8":"5.964732e-10","9":"1595","10":"425"},{"1":"Flavonifractor.plautii","2":"dysbiosis","3":"dysbiosis","4":"-0.7424300","5":"0.11558647","6":"1.761869e-10","7":"dysbiosis","8":"1.009070e-09","9":"1595","10":"1068"},{"1":"Ruminococcus.lactaris","2":"dysbiosis","3":"dysbiosis","4":"-0.6429319","5":"0.10372387","6":"7.262353e-10","7":"dysbiosis","8":"4.066918e-09","9":"1595","10":"454"},{"1":"Clostridium.clostridioforme","2":"dysbiosis","3":"dysbiosis","4":"0.6880921","5":"0.11477202","6":"2.512079e-09","7":"dysbiosis","8":"1.376182e-08","9":"1595","10":"518"},{"1":"Bifidobacterium.longum","2":"dysbiosis","3":"dysbiosis","4":"-0.7193631","5":"0.12193393","6":"4.442754e-09","7":"dysbiosis","8":"2.382072e-08","9":"1595","10":"1002"},{"1":"Acidaminococcus.unclassified","2":"dysbiosis","3":"dysbiosis","4":"-0.4647786","5":"0.08005535","6":"7.759552e-09","7":"dysbiosis","8":"4.073765e-08","9":"1595","10":"194"},{"1":"Escherichia.coli","2":"dysbiosis","3":"dysbiosis","4":"0.7568216","5":"0.13224554","6":"1.264715e-08","7":"dysbiosis","8":"6.504246e-08","9":"1595","10":"975"},{"1":"Sutterella.wadsworthensis","2":"dysbiosis","3":"dysbiosis","4":"-0.6283767","5":"0.11646426","6":"7.886010e-08","7":"dysbiosis","8":"3.974549e-07","9":"1595","10":"432"},{"1":"Paraprevotella.unclassified","2":"dysbiosis","3":"dysbiosis","4":"-0.3816101","5":"0.07387414","6":"2.709964e-07","7":"dysbiosis","8":"1.339041e-06","9":"1595","10":"243"},{"1":"Bacteroides.fragilis","2":"dysbiosis","3":"dysbiosis","4":"-0.7874375","5":"0.15351702","6":"3.267279e-07","7":"dysbiosis","8":"1.583374e-06","9":"1595","10":"891"},{"1":"Coprobacillus.unclassified","2":"dysbiosis","3":"dysbiosis","4":"0.5169648","5":"0.10104121","6":"3.529976e-07","7":"dysbiosis","8":"1.678404e-06","9":"1595","10":"415"},{"1":"Bifidobacterium.adolescentis","2":"dysbiosis","3":"dysbiosis","4":"-0.5996010","5":"0.11866470","6":"4.853587e-07","7":"dysbiosis","8":"2.265007e-06","9":"1595","10":"555"},{"1":"Parabacteroides.goldsteinii","2":"dysbiosis","3":"dysbiosis","4":"-0.2953743","5":"0.06269543","6":"2.678391e-06","7":"dysbiosis","8":"1.227190e-05","9":"1595","10":"187"},{"1":"Bifidobacterium.pseudocatenulatum","2":"dysbiosis","3":"dysbiosis","4":"-0.3762470","5":"0.08016101","6":"2.920508e-06","7":"dysbiosis","8":"1.314228e-05","9":"1595","10":"230"},{"1":"Burkholderiales.bacterium.1.1.47","2":"dysbiosis","3":"dysbiosis","4":"-0.4703586","5":"0.10098508","6":"3.466102e-06","7":"dysbiosis","8":"1.532382e-05","9":"1595","10":"731"},{"1":"Bacteroides.intestinalis","2":"dysbiosis","3":"dysbiosis","4":"-0.2551030","5":"0.05526364","6":"4.232375e-06","7":"dysbiosis","8":"1.838894e-05","9":"1595","10":"193"},{"1":"Bacteroides.massiliensis","2":"dysbiosis","3":"dysbiosis","4":"-0.5377140","5":"0.11803927","6":"5.638991e-06","7":"dysbiosis","8":"2.408518e-05","9":"1595","10":"577"},{"1":"Paraprevotella.clara","2":"dysbiosis","3":"dysbiosis","4":"-0.2339220","5":"0.05222362","6":"8.048728e-06","7":"dysbiosis","8":"3.380466e-05","9":"1595","10":"191"},{"1":"Parasutterella.excrementihominis","2":"dysbiosis","3":"dysbiosis","4":"-0.4650693","5":"0.10458800","6":"9.328763e-06","7":"dysbiosis","8":"3.853850e-05","9":"1595","10":"759"},{"1":"Bacteroides.faecis","2":"dysbiosis","3":"dysbiosis","4":"-0.3572573","5":"0.08158066","6":"1.272332e-05","7":"dysbiosis","8":"5.171416e-05","9":"1595","10":"604"},{"1":"Ruminococcus.gnavus","2":"dysbiosis","3":"dysbiosis","4":"0.5145550","5":"0.13374588","6":"1.242389e-04","7":"dysbiosis","8":"4.969555e-04","9":"1595","10":"970"},{"1":"Ruminococcus.callidus","2":"dysbiosis","3":"dysbiosis","4":"-0.3996428","5":"0.10647337","6":"1.809752e-04","7":"dysbiosis","8":"7.125898e-04","9":"1595","10":"323"},{"1":"Alistipes.unclassified","2":"dysbiosis","3":"dysbiosis","4":"0.3030813","5":"0.09772835","6":"1.960836e-03","7":"dysbiosis","8":"7.602011e-03","9":"1595","10":"224"},{"1":"Akkermansia.muciniphila","2":"diagnosis","3":"UC","4":"-3.3594072","5":"1.10540299","6":"2.926899e-03","7":"diagnosisUC","8":"1.117543e-02","9":"1595","10":"578"},{"1":"Lachnospiraceae.bacterium.1.1.57FAA","2":"dysbiosis","3":"dysbiosis","4":"-0.3761841","5":"0.12742367","6":"3.213970e-03","7":"dysbiosis","8":"1.208837e-02","9":"1595","10":"475"},{"1":"Haemophilus.parainfluenzae","2":"dysbiosis","3":"dysbiosis","4":"-0.3978589","5":"0.14004604","6":"4.558251e-03","7":"dysbiosis","8":"1.689234e-02","9":"1595","10":"887"},{"1":"Clostridium.bolteae","2":"diagnosis","3":"CD","4":"2.4742078","5":"0.88384443","6":"6.047473e-03","7":"diagnosisCD","8":"2.208642e-02","9":"1595","10":"1138"},{"1":"Bifidobacterium.adolescentis","2":"diagnosis","3":"CD","4":"-2.4950808","5":"0.89668300","6":"6.251557e-03","7":"diagnosisCD","8":"2.250560e-02","9":"1595","10":"555"},{"1":"Parabacteroides.goldsteinii","2":"diagnosis","3":"CD","4":"-1.6469205","5":"0.59360570","6":"6.379194e-03","7":"diagnosisCD","8":"2.264165e-02","9":"1595","10":"187"},{"1":"Alistipes.putredinis","2":"diagnosis","3":"UC","4":"-3.6369801","5":"1.31939326","6":"6.749794e-03","7":"diagnosisUC","8":"2.362428e-02","9":"1595","10":"940"},{"1":"Alistipes.shahii","2":"diagnosis","3":"UC","4":"-3.1527621","5":"1.18698509","6":"8.959051e-03","7":"diagnosisUC","8":"3.092714e-02","9":"1595","10":"757"},{"1":"Coprobacillus.unclassified","2":"diagnosis","3":"UC","4":"1.5317934","5":"0.59373620","6":"1.120062e-02","7":"diagnosisUC","8":"3.814265e-02","9":"1595","10":"415"},{"1":"Alistipes.shahii","2":"diagnosis","3":"CD","4":"-2.7033406","5":"1.07857588","6":"1.351438e-02","7":"diagnosisCD","8":"4.493892e-02","9":"1595","10":"757"},{"1":"Ruminococcus.callidus","2":"diagnosis","3":"CD","4":"-1.5513433","5":"0.61842332","6":"1.355301e-02","7":"diagnosisCD","8":"4.493892e-02","9":"1595","10":"323"},{"1":"Ruminococcus.bromii","2":"diagnosis","3":"CD","4":"-2.2848464","5":"0.91646707","6":"1.399249e-02","7":"diagnosisCD","8":"4.579360e-02","9":"1595","10":"512"},{"1":"Roseburia.inulinivorans","2":"diagnosis","3":"CD","4":"-1.9765504","5":"0.79666921","6":"1.452218e-02","7":"diagnosisCD","8":"4.691782e-02","9":"1595","10":"1074"}],"options":{"columns":{"min":{},"max":[10]},"rows":{"min":[10],"max":[10]},"pages":{}}}
   </script>
 </div>
 <p>Draw a volcano plot to illustrate q-values and coefficients</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># add a column to indicate significant genus </span></span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>all_results_sig <span class="ot">&lt;-</span> all_results <span class="sc">%&gt;%</span> </span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">whether_sig =</span> <span class="fu">case_when</span>(coef <span class="sc">&gt;=</span> <span class="fl">0.3</span> <span class="sc">&amp;</span> qval <span class="sc">&lt;=</span> <span class="fl">0.05</span> <span class="sc">~</span> <span class="st">&quot;Positive&quot;</span>,</span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>                                 coef <span class="sc">&lt;=</span> <span class="sc">-</span><span class="fl">0.3</span> <span class="sc">&amp;</span> qval <span class="sc">&lt;=</span> <span class="fl">0.05</span> <span class="sc">~</span> <span class="st">&quot;Negative&quot;</span>,</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">abs</span>(coef) <span class="sc">&lt;</span> <span class="fl">0.3</span> <span class="sc">|</span> qval <span class="sc">&gt;</span><span class="fl">0.05</span> <span class="sc">~</span> <span class="st">&quot;No association&quot;</span>)) </span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># add label column </span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>all_results_sig<span class="sc">$</span>relabel <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>all_results_sig<span class="sc">$</span>relabel[all_results_sig<span class="sc">$</span>whether_sig <span class="sc">!=</span> <span class="st">&quot;No association&quot;</span>] <span class="ot">&lt;-</span> all_results_sig<span class="sc">$</span>feature[all_results_sig<span class="sc">$</span>whether_sig <span class="sc">!=</span> <span class="st">&quot;No association&quot;</span>]</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co"># set personal color palate </span></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>mycolors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;black&quot;</span>)</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mycolors) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Negative&quot;</span>, <span class="st">&quot;Positive&quot;</span>, <span class="st">&quot;No association&quot;</span>) </span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a><span class="co"># volcano plot </span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>all_results_sig <span class="sc">%&gt;%</span> </span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value <span class="sc">==</span> <span class="st">&quot;dysbiosis&quot;</span>) <span class="sc">%&gt;%</span> <span class="co">#focus on dysbiosis </span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>coef, <span class="at">y=</span><span class="sc">-</span><span class="fu">log10</span>(qval),</span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">color=</span>whether_sig,</span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">label=</span>relabel))<span class="sc">+</span></span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>), <span class="at">color=</span><span class="st">&quot;red&quot;</span>)<span class="sc">+</span></span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="sc">-</span><span class="fu">log10</span>(<span class="fl">0.05</span>), <span class="at">color=</span><span class="st">&quot;red&quot;</span>)<span class="sc">+</span></span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> mycolors)<span class="sc">+</span></span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span> </span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>() <span class="co">#label taxa names </span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># add a column to indicate significant genus </span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>all_results_sig <span class="ot">&lt;-</span> all_results <span class="sc">%&gt;%</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">whether_sig =</span> <span class="fu">case_when</span>(coef <span class="sc">&gt;=</span> <span class="fl">0.3</span> <span class="sc">&amp;</span> qval <span class="sc">&lt;=</span> <span class="fl">0.05</span> <span class="sc">~</span> <span class="st">&quot;Positive&quot;</span>,</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>                                 coef <span class="sc">&lt;=</span> <span class="sc">-</span><span class="fl">0.3</span> <span class="sc">&amp;</span> qval <span class="sc">&lt;=</span> <span class="fl">0.05</span> <span class="sc">~</span> <span class="st">&quot;Negative&quot;</span>,</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>                                 <span class="fu">abs</span>(coef) <span class="sc">&lt;</span> <span class="fl">0.3</span> <span class="sc">|</span> qval <span class="sc">&gt;</span><span class="fl">0.05</span> <span class="sc">~</span> <span class="st">&quot;No association&quot;</span>)) </span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a><span class="co"># add label column </span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>all_results_sig<span class="sc">$</span>relabel <span class="ot">&lt;-</span> <span class="cn">NA</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>all_results_sig<span class="sc">$</span>relabel[all_results_sig<span class="sc">$</span>whether_sig <span class="sc">!=</span> <span class="st">&quot;No association&quot;</span>] <span class="ot">&lt;-</span> all_results_sig<span class="sc">$</span>feature[all_results_sig<span class="sc">$</span>whether_sig <span class="sc">!=</span> <span class="st">&quot;No association&quot;</span>]</span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a><span class="co"># set personal color palate </span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>mycolors <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;blue&quot;</span>, <span class="st">&quot;red&quot;</span>, <span class="st">&quot;black&quot;</span>)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(mycolors) <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">&quot;Negative&quot;</span>, <span class="st">&quot;Positive&quot;</span>, <span class="st">&quot;No association&quot;</span>) </span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a><span class="co"># volcano plot </span></span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>all_results_sig <span class="sc">%&gt;%</span> </span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value <span class="sc">==</span> <span class="st">&quot;dysbiosis&quot;</span>) <span class="sc">%&gt;%</span> <span class="co">#focus on dysbiosis </span></span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>coef, <span class="at">y=</span><span class="sc">-</span><span class="fu">log10</span>(qval),</span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">color=</span>whether_sig,</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">label=</span>relabel))<span class="sc">+</span></span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>()<span class="sc">+</span></span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">0.3</span>, <span class="fl">0.3</span>), <span class="at">color=</span><span class="st">&quot;red&quot;</span>)<span class="sc">+</span></span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="sc">-</span><span class="fu">log10</span>(<span class="fl">0.05</span>), <span class="at">color=</span><span class="st">&quot;red&quot;</span>)<span class="sc">+</span></span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> mycolors)<span class="sc">+</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span> </span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>() <span class="co">#label taxa names </span></span></code></pre></div>
 <div class="figure" style="text-align: center">
-<img src="about_files/figure-html/volcano%20plot%20qval%20and%20coeff-1.png" alt="Illustration of coefficients and q-values of diagnosis scores for individual species" width="576" />
+<img src="maaslin2-IBD-microbiome_files/figure-html/volcano%20plot%20qval%20and%20coeff-1.png" alt="Illustration of coefficients and q-values of diagnosis scores for individual species" width="576" />
 <p class="caption">
 Illustration of coefficients and q-values of diagnosis scores for
 individual species
@@ -1182,26 +1185,26 @@ individual species
 interpretation</h2>
 <p>Use <code>Faecalibacterium.prausnitzii</code> as an example for model
 interpretation.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>coef_Fae <span class="ot">&lt;-</span> all_results_sig <span class="sc">%&gt;%</span> </span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value <span class="sc">==</span> <span class="st">&quot;dysbiosis&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(feature <span class="sc">==</span> <span class="st">&quot;Faecalibacterium.prausnitzii&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(coef) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(., <span class="dv">3</span>) </span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>qval_Fae <span class="ot">&lt;-</span> all_results_sig <span class="sc">%&gt;%</span> </span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value <span class="sc">==</span> <span class="st">&quot;dysbiosis&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(feature <span class="sc">==</span> <span class="st">&quot;Faecalibacterium.prausnitzii&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(qval) <span class="sc">%&gt;%</span> </span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>() <span class="sc">%&gt;%</span></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format</span>(., <span class="at">scientific=</span><span class="cn">TRUE</span>) </span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>coef_Fae <span class="ot">&lt;-</span> all_results_sig <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value <span class="sc">==</span> <span class="st">&quot;dysbiosis&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(feature <span class="sc">==</span> <span class="st">&quot;Faecalibacterium.prausnitzii&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(coef) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">round</span>(., <span class="dv">3</span>) </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>qval_Fae <span class="ot">&lt;-</span> all_results_sig <span class="sc">%&gt;%</span> </span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value <span class="sc">==</span> <span class="st">&quot;dysbiosis&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(feature <span class="sc">==</span> <span class="st">&quot;Faecalibacterium.prausnitzii&quot;</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(qval) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb25-13"><a href="#cb25-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">format</span>(., <span class="at">scientific=</span><span class="cn">TRUE</span>) </span></code></pre></div>
 <p><em>F. prausnitzii</em> is negatively associated with
 <code>dysbiosis</code> (q value = 4.581083e-163). In particularly,
 <em>F. prausnitzii</em> percentage in feces may decrease by 2.601 on
 average when <code>dysbiosis</code> scores increases by 1 unit
 independent of <code>diagnosis</code> status.</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sessoin information </span></span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()  </span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Sessoin information </span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sessionInfo</span>()  </span></code></pre></div>
 <pre><code>## R version 4.2.1 (2022-06-23 ucrt)
 ## Platform: x86_64-w64-mingw32/x64 (64-bit)
 ## Running under: Windows 10 x64 (build 22621)
