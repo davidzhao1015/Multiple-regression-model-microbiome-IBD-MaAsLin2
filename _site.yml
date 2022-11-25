@@ -1,0 +1,32 @@
+name: "my-microbiome-data-sci-website"  # provides a suggested URL path for the website
+output_dir: "docs" # which directory to copy site content to
+include: ["*.html"] # indicate what files are copied into the output directory 
+navbar:
+  title: "My Microbiome Data Science Website"
+  left:
+    - text: "Home"
+      icon: fa-home
+      href: index.html
+    - text: "Multivariate model"
+      icon: fa-info
+      href: about.html
+    - text: "More"
+      icon: fa-gear
+      menu:
+        - text: "Heading 1"
+        - text: "Page A"
+        - text: "Page B"
+        - text: "---------" 
+        - text: "Heading 2"
+output:
+  html_document:
+    theme: cosmo
+    highlight: pygments
+    df_print: paged
+    toc: TRUE
+    toc_float: TRUE
+    collapsed: FALSE
+    number_sections: TRUE
+    fig_width: 7
+    fig_height: 6
+    fig_caption: TRUE
