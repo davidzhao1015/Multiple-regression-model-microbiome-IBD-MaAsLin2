@@ -1,6 +1,5 @@
 name: "my-microbiome-data-sci-website"  # provides a suggested URL path for the website
-output_dir: "docs" # which directory to copy site content to
-include: ["*.html"] # indicate what files are copied into the output directory 
+output_dir: "." # which directory to copy site content to
 navbar:
   title: "My Microbiome Data Science Website"
   left:
