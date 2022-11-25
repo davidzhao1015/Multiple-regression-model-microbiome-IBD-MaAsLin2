@@ -1,0 +1,13 @@
+name: "Multiple-regression-model-microbiome-IBD-MaAsLin2"
+output_dir: "docs"
+navbar:
+  title: "My Microbiome Data Science Website"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Multivariate model"
+      href: about.html
+output:
+  html_document:
+    theme: cosmo
+    highlight: textmate
