@@ -5,7 +5,8 @@ date: "Last edited `r format(Sys.time(), '%d %B %Y')`"
 ---
 
 ```{css}
-h1 {color: red;}
+h1, h2 {color: black;}
+body {color: green}
 ```
 
 ```{r setup, include = FALSE}
